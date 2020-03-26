@@ -4,12 +4,16 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
 var redisdb *redis.Client
 
+var (
+	sdk    *fabsdk.FabricSDK
+	client *channel.Client
+)
 
 func InitRedis(addr string, pwd string, db int) (err error) {
 	redisdb = redis.NewClient(&redis.Options{

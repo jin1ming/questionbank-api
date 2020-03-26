@@ -9,9 +9,13 @@ import (
 
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+
+	// 调试需要session，之后移除
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
+
 	gin.SetMode(gin.ReleaseMode)
+
 	apiv1 := r.Group("/api/v1")
 	{
 		/*****************测试API:Start*****************/

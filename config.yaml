@@ -82,14 +82,14 @@ client:
 
   tlsCerts:
     # [Optional]. Use system certificate pool when connecting to peers, orderers (for negotiating TLS) Default: false
-    systemCertPool: false
+    systemCertPool: true
 
     # [Optional]. Client key and cert for TLS handshake with peers and orderers
     client:
       key:
-        path: #${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/users/Admin@org1.questionbank.com/tls/client.key
+        path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/users/Admin@org1.questionbank.com/tls/client.key
       cert:
-        path: #${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/users/Admin@org1.questionbank.com/tls/client.crt
+        path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/users/Admin@org1.questionbank.com/tls/client.crt
 
 #
 # [Optional]. But most apps would have this section so that channel objects can be constructed
@@ -210,7 +210,7 @@ channels:
 #
 organizations:
   Org1:
-    mspid: org1.questionbank.com
+    mspid: Org1MSP
     cryptoPath: peerOrganizations/org1.questionbank.com/users/{userName}@org1.questionbank.com/msp
     peers:
       - peer0.org1.questionbank.com
@@ -310,7 +310,7 @@ certificateAuthorities:
     url: http://localhost:7054
     tlsCACerts:
       # Certificate location absolute path
-      path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/ca/ca.org1.questionbank.com-cert.pem
+      path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/tlsca/tlsca.org1.questionbank.com-cert.pem
 
     # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
     # needed to enroll and invoke new users.

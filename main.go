@@ -25,7 +25,7 @@ func main() {
 
 		ChaincodeID: "questionbank",
 		ChaincodeGoPath: os.Getenv("GOPATH"),
-		ChaincodePath: "/questionbank-api/chaincode/", //这里不需要src！
+		ChaincodePath: "questionbank-api/chaincode/", //这里不需要src！
 		UserName:"User1",
 	}
 

@@ -15,21 +15,22 @@ services:
       - ORDERER_GENERAL_GENESISPROFILE=MultiNodeEtcdRaft
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=questionbank.com
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
       - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - ./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - "./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block"
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer.questionbank.com/msp:/var/hyperledger/orderer/msp
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer.questionbank.com/tls:/var/hyperledger/orderer/tls
+      - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com:/var/hyperledger/peerOrg1
     ports:
       - 7050:7050
 
@@ -49,21 +50,22 @@ services:
       - ORDERER_GENERAL_GENESISPROFILE=MultiNodeEtcdRaft
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=questionbank.com
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
       - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - ./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - "./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block"
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer2.questionbank.com/msp:/var/hyperledger/orderer/msp
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer2.questionbank.com/tls:/var/hyperledger/orderer/tls
+      - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com:/var/hyperledger/peerOrg1
     ports:
       - 8050:8050
     networks:
@@ -81,21 +83,22 @@ services:
       - ORDERER_GENERAL_GENESISPROFILE=MultiNodeEtcdRaft
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=questionbank.com
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
       - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt,/var/hyperledger/peerOrg1/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - ./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - "./artifacts/genesis.block:/var/hyperledger/orderer/genesis.block"
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer3.questionbank.com/msp:/var/hyperledger/orderer/msp
       - ./crypto-config/ordererOrganizations/questionbank.com/orderers/orderer3.questionbank.com/tls:/var/hyperledger/orderer/tls
+      - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com:/var/hyperledger/peerOrg1
     ports:
       - 9050:9050
     networks:
@@ -110,10 +113,10 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.org1.questionbank.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/15e90881391e54c3c98472e6c32203a16b68ffb9156a910dfdae6c6378aae31c_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/124d8a2882517dabe3f94d35bdbc888af1ffb8b5d50cf9d3e615a4a5de8840b0_sk
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/15e90881391e54c3c98472e6c32203a16b68ffb9156a910dfdae6c6378aae31c_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/124d8a2882517dabe3f94d35bdbc888af1ffb8b5d50cf9d3e615a4a5de8840b0_sk
     ports:
       - 7054:7054
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -131,7 +134,7 @@ services:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_ATTACHSTDOUT=true
       - CORE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_NETWORKID=questionbank
+      - CORE_PEER_NETWORKID=peer0.org1.questionbank.com
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
@@ -144,7 +147,7 @@ services:
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
-      - CORE_PEER_LOCALMSPID=org1.questionbank.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
       - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.questionbank.com
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -159,7 +162,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com/tls:/var/hyperledger/tls
     ports:
       - 7051:7051
-     # - 7053:7053
+      - 7053:7053
     depends_on:
       - orderer.questionbank.com
       - couchdb
@@ -188,7 +191,7 @@ services:
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
-      - CORE_PEER_LOCALMSPID=org1.questionbank.com
+      - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
       - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.org1.questionbank.com
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -203,7 +206,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer1.org1.questionbank.com/tls:/var/hyperledger/tls
     ports:
       - 7151:7051
-      #- 7153:7053
+      - 7153:7053
     depends_on:
       - orderer.questionbank.com
       - couchdb

@@ -71,10 +71,12 @@ func CreateChannel(sdk *fabsdk.FabricSDK, info *InitInfo) error {
 	if err != nil {
 		return fmt.Errorf("获取指定id的签名标识失败: %v", err)
 	}
+	//fmt.Printf("adminIdentity: \n%s\n",adminIdentity)
 
 	// SaveChannelRequest holds parameters for save channel request
 	channelReq := resmgmt.SaveChannelRequest{ChannelID:info.ChannelID, ChannelConfigPath:info.ChannelConfig, SigningIdentities:[]msp.SigningIdentity{adminIdentity}}
 	// save channel response with transaction ID
+	//fmt.Printf("channelReq:\n%s\n", channelReq)
 	_, err = resMgmtClient.SaveChannel(channelReq, resmgmt.WithRetry(retry.DefaultResMgmtOpts), resmgmt.WithOrdererEndpoint(info.OrdererOrgName))
 	if err != nil {
 		return fmt.Errorf("创建应用通道失败: %v", err)

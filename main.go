@@ -1,20 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
 	"os"
+	apiservice "questionbank-api/controller/api/v1"
+	router "questionbank-api/router/v1"
 	"questionbank-api/sdkInit"
 )
 
 
+func main()  {
 
-const (
-	configFile = "config.yaml"
-	initialized = false
-)
+	// 初始化redis
+	apiservice.InitRedis("localhost:6379", "", 0)
 
-func main() {
-
+	// 初始化sdk、创建通道、安装链码
 	initInfo := &sdkInit.InitInfo{
 
 		ChannelID: "miracle",
@@ -25,30 +25,20 @@ func main() {
 
 		ChaincodeID: "questionbank",
 		ChaincodeGoPath: os.Getenv("GOPATH"),
-		ChaincodePath: "questionbank-api/chaincode/", //这里不需要src！
+		ChaincodePath: "questionbank-api/chaincode/", //这里不需要src！ 开始也不能有/
 		UserName:"User1",
 	}
+	apiservice.InitSdk(initInfo,"config.yaml")
 
-	sdk, err := sdkInit.SetupSDK(configFile, initialized)
-	if err != nil {
-		fmt.Printf(err.Error())
-		return
+	// 初始化gin
+	r := router.InitRouter()
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        r,
 	}
-
-	defer sdk.Close()
-
-	err = sdkInit.CreateChannel(sdk, initInfo)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
+	if err := s.ListenAndServe(); err != nil {
+		panic(err.Error())
 	}
-
-	channelClient, err := sdkInit.InstallAndInstantiateCC(sdk, initInfo)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	fmt.Println(channelClient)
-
 }
+
 

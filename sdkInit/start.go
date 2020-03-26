@@ -31,11 +31,7 @@ type InitInfo struct {
 const ChaincodeVersion  = "1.0"
 
 
-func SetupSDK(ConfigFile string, initialized bool) (*fabsdk.FabricSDK, error) {
-
-	if initialized {
-		return nil, fmt.Errorf("Fabric SDK已被实例化")
-	}
+func SetupSDK(ConfigFile string) (*fabsdk.FabricSDK, error) {
 
 	sdk, err := fabsdk.New(config.FromFile(ConfigFile))
 	if err != nil {

@@ -2,15 +2,14 @@ package sdkInit
 
 import (
 	"fmt"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	mspclient "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/errors/retry"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
-	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/ccpackager/gopackager"
+	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/cauthdsl"
 )
 
@@ -62,6 +61,36 @@ func CreateChannel(sdk *fabsdk.FabricSDK, info *InitInfo) error {
 		return fmt.Errorf("根据指定的 OrgName 创建 Org MSP 客户端实例失败: %v", err)
 	}
 
+	/*用于测试*/
+	/*
+	userName := "w"
+	secret := "w"
+	//判断是否存在
+	//注册用户
+	request := &mspclient.RegistrationRequest{
+		Name:userName,
+		Type:"user",
+		CAName:"ca.org1.questionbank.com",
+		Secret:secret,
+	}
+	_, err = mspClient.Register(request)
+	if err != nil && !strings.Contains(err.Error(), "is already registered") {
+		panic(err)
+		log.Fatalf("register %s [%s]\n", userName, err)
+	}
+	//登记保存证书到stores
+	err = mspClient.Enroll(userName, mspclient.WithSecret(secret))
+	if err != nil {
+		log.Panicf("Failed to enroll user: %s\n", err)
+	}
+	//判断是否存在
+	id, err := mspClient.GetSigningIdentity(userName)
+	if err == nil {
+		log.Println("user exists: ", userName)
+		log.Println("id:", id)
+	}
+	log.Printf("register %s successfully\n", userName)
+	*/
 	//  Returns: signing identity
 	adminIdentity, err := mspClient.GetSigningIdentity(info.OrgAdmin)
 	if err != nil {

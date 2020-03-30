@@ -82,7 +82,7 @@ client:
 
   tlsCerts:
     # [Optional]. Use system certificate pool when connecting to peers, orderers (for negotiating TLS) Default: false
-    systemCertPool: true
+    systemCertPool: false
 
     # [Optional]. Client key and cert for TLS handshake with peers and orderers
     client:
@@ -310,8 +310,10 @@ certificateAuthorities:
     url: http://localhost:7054
     tlsCACerts:
       # Certificate location absolute path
-      path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/tlsca/tlsca.org1.questionbank.com-cert.pem
-
+      #path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/tlsca/tlsca.org1.questionbank.com-cert.pem
+      path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/ca/ca.org1.questionbank.com-cert.pem
+    httpOptions:
+      verify: false
     # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
     # needed to enroll and invoke new users.
     registrar:

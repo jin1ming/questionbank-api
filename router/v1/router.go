@@ -24,14 +24,20 @@ func InitRouter() *gin.Engine {
 		// 登录
 		apiv1.POST("/login", apiservice.UserLogin)
 		// 登出操作
-		apiv1.GET("/logout", apiservice.UserLogout)
+		//apiv1.GET("/logout", apiservice.UserLogout)
 		// 刷新token
-		apiv1.GET("/token", apiservice.RefreshToken)
+		//apiv1.GET("/token", apiservice.RefreshToken)
 		/******************测试API:END******************/
-		//注册
+		// 注册
 		apiv1.POST("/register", apiservice.AddUser)
 		// 删除用户
-		apiv1.DELETE("/user/:id", apiservice.DeleteUser)
+		apiv1.DELETE("/delete", apiservice.DelUser)
+		// 增加试题
+		apiv1.POST("/putquestion", apiservice.PutQuestion)
+		// 删除试题
+		apiv1.POST("/delquestion", apiservice.DelQuestion)
+		// 查询试题
+		apiv1.POST("/getquestion", apiservice.GetQuestion)
 	}
 
 	return r

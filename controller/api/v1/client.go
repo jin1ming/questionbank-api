@@ -2,16 +2,14 @@ package v1
 
 import (
 	"encoding/hex"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	mspclient "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/errors/retry"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	"log"
 	"strings"
 )
 
-
-const (
-	Admin = "Admin"
-)
 
 
 func GetKeyFile(id msp.SigningIdentity) (string, string) {
@@ -20,13 +18,10 @@ func GetKeyFile(id msp.SigningIdentity) (string, string) {
 	return priFile, pubFile
 }
 
-func RegisterUser(userName string, userOrg string, role string) (priFile string, pubFile string, err error) {
+func RegisterUser(userName string, role string) (priFile string, pubFile string, err error) {
 
-	secret := userName + userOrg
-	if sdk == nil {
-		log.Fatal("sdk is nil!!!!!!!!!!!!!!!!!!")
-	}
-	mspClient, err := mspclient.New(sdk.Context(), mspclient.WithOrg(userOrg))
+	secret := userName + orgName
+	mspClient, err := mspclient.New(sdk.Context(), mspclient.WithOrg(orgName))
 	if err != nil {
 		log.Panicf("Failed to create msp client: %s\n", err)
 		return
@@ -51,7 +46,7 @@ func RegisterUser(userName string, userOrg string, role string) (priFile string,
 		Type: "user",
 		Secret: secret,
 		Attributes: attris,
-		Affiliation: "org1",
+		Affiliation: orgName,
 	}
 	_, err = mspClient.Register(request)
 	if err != nil && !strings.Contains(err.Error(), "is already registered") {
@@ -71,19 +66,63 @@ func RegisterUser(userName string, userOrg string, role string) (priFile string,
 	return
 }
 
-func DeleteUser(userName string, userOrg string) error {
-	if sdk == nil {
-		log.Fatal("sdk is nil!!!!!!!!!!!!!!!!!!")
+func GetId(userName string, userOrg string) (*mspclient.IdentityResponse, error) {
+	mspClient, err := mspclient.New(sdk.Context(), mspclient.WithOrg(userOrg))
+	if err != nil {
+		log.Panicf("Failed to create msp client: %s\n", err)
+		return nil, err
 	}
+	//判断是否存在
+	id, err := mspClient.GetIdentity(userName)
+	if err != nil {
+		return nil, err
+	}
+	return id, nil
+}
+
+func RemoveUser(userName string, userOrg string) error {
 	mspClient, err := mspclient.New(sdk.Context(), mspclient.WithOrg(userOrg))
 	if err != nil {
 		log.Panicf("Failed to create msp client: %s\n", err)
 		return err
 	}
 	//判断是否存在
-	id, err := mspClient.GetSigningIdentity(userName)
+	_, err = mspClient.GetSigningIdentity(userName)
 	if err != nil {
 		log.Println("user not exists: ", userName)
 		return err
 	}
+	request := mspclient.RemoveIdentityRequest{
+		ID:     userName,
+		Force:  false,
+		CAName: "ca.org1.questionbank.com",
+	}
+	_, err  = mspClient.RemoveIdentity(&request)
+	if err != nil {
+		log.Println("remove identify failed !")
+		return err
+	}
+	return nil
+}
+
+func queryCC(client *channel.Client, queryArgs [][]byte) ([]byte, error) {
+	response, err := client.Query(channel.Request{ChaincodeID: ccID, Fcn: "invoke", Args: queryArgs},
+		channel.WithRetry(retry.DefaultChannelOpts))
+	if err != nil {
+		log.Println("Failed to query: %s", err)
+		return nil, err
+	}
+	log.Println(response)
+
+	return response.Payload, nil
+}
+
+func executeCC(client *channel.Client, txArgs [][]byte) error {
+	_, err := client.Execute(channel.Request{ChaincodeID: ccID, Fcn: "invoke", Args: txArgs},
+		channel.WithRetry(retry.DefaultChannelOpts))
+	if err != nil {
+		log.Println("Failed to execute: %s", err)
+		return err
+	}
+	return nil
 }

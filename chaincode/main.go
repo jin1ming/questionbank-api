@@ -29,12 +29,12 @@ func (c *QuestionBank) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return getScore(stub, args)
 	case "getLogs":		// 获取日志
 		return getLogs(stub, args)
-	case "userRegister":// 注册用户
-		return userRegister(stub, args)
-	case "userDestroy":	// 注销用户
-		return userDestroy(stub, args)
+	//case "userRegister":// 注册用户
+		//return userRegister(stub, args)
+	//case "userDestroy":	// 注销用户
+		//return userDestroy(stub, args)
 	case "getCache":
-		return getCache(stub, args)
+		return getCache(stub)
 	case "approve":		// 通过审核
 		return approve(stub, args)
 	case "reject":		// 审核失败

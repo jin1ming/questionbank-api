@@ -169,7 +169,7 @@ func DelQuestion(c *gin.Context) {
 		return
 	}
 
-	var txArgs = [][]byte{[]byte("putQuestion"), []byte(name), []byte(questionId)}
+	var txArgs = [][]byte{[]byte("delQuestion"), []byte(name), []byte(questionId)}
 	err = executeCC(client, txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -211,4 +211,39 @@ func GetQuestion(c *gin.Context) {
 		"info":"获取试题成功!",
 		"data":question,
 	})
+}
+
+func GetCache(c *gin.Context) {
+	session := sessions.Default(c)
+	name := session.Get("name").(string)
+
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info":"获取待审核事件失败!",
+		})
+		return
+	}
+
+	var queryArgs = [][]byte{[]byte("getCache"), []byte(name)}
+	events, err := queryCC(client, queryArgs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"info":"获取待审核事件失败!",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"info":"获取待审核事件成功!",
+		"data":events,
+	})
+}
+
+func Approve(c *gin.Context)  {
+	session := sessions.Default(c)
+	name := session.Get("name").(string)
+	//TODO
 }

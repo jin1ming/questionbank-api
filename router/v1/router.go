@@ -33,11 +33,13 @@ func InitRouter() *gin.Engine {
 		// 删除用户
 		apiv1.DELETE("/delete", apiservice.DelUser)
 		// 增加试题
-		apiv1.POST("/putquestion", apiservice.PutQuestion)
+		apiv1.POST("/put_question", apiservice.PutQuestion)
 		// 删除试题
-		apiv1.POST("/delquestion", apiservice.DelQuestion)
+		apiv1.POST("/del_question", apiservice.DelQuestion)
 		// 查询试题
-		apiv1.POST("/getquestion", apiservice.GetQuestion)
+		apiv1.POST("/get_question", apiservice.GetQuestion)
+		// 获取待审核事件
+		apiv1.POST("/get_cache", apiservice.GetCache)
 	}
 
 	return r

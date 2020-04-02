@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -37,20 +38,10 @@ func putDelCache(stub shim.ChaincodeStubInterface, id string) error {
 }
 
 // 获取用户身份
-func getRole(stub shim.ChaincodeStubInterface, name string) (role string, err error) {
-	key := "user_" + name
-
-	userBytes, err := stub.GetState(key)
-	if err != nil || len(userBytes) == 0 {
-		return role,fmt.Errorf("user not found")
+func getRole(stub shim.ChaincodeStubInterface) (role string, ok bool) {
+	role, ok, err := cid.GetAttributeValue(stub, "Role")
+	if err != nil || !ok {
+		return "", false
 	}
-
-	user := new(User)
-	err = json.Unmarshal(userBytes, user)
-	if err != nil {
-		return
-	}
-
-	role = user.Role
 	return
 }

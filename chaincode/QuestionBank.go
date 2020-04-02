@@ -9,70 +9,6 @@ import (
 
 type QuestionBank struct{}
 
-//TODO 用户及权限检验部分应在后期使用证书！
-
-func userRegister(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	// 检查参数个数与正确性
-	if len(args) != 2 {
-		return shim.Error("not enough args")
-	}
-	name := args[0]
-	role := args[1]
-	if name == "" || role == "" {
-		return shim.Error("invalid args")
-	}
-
-	// 检查用户是否已经注册
-	if userBytes, err := stub.GetState(constructUserKey(name)); err == nil && len(userBytes) != 0 {
-		return shim.Error("user already exist")
-	}
-
-	// 写入状态
-	user := &User{
-		Name:   name,
-		Role:	role,
-	}
-
-	// 序列化对象
-	userBytes, err := json.Marshal(user)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("marshal user error %s", err))
-	}
-
-	if err := stub.PutState(constructUserKey(name), userBytes); err != nil {
-		return shim.Error(fmt.Sprintf("put user error %s", err))
-	}
-
-	// 成功返回
-	return shim.Success(nil)
-}
-
-func userDestroy(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	// 检查参数个数与合法性
-	if len(args) != 1 {
-		return shim.Error("not enough args")
-	}
-	name := args[0]
-	if name == "" {
-		return shim.Error("invalid args")
-	}
-
-	// 验证用户是否存在
-	userBytes, err := stub.GetState(constructUserKey(name))
-	if err != nil || len(userBytes) == 0 {
-		return shim.Error("user not found")
-	}
-
-	// 写入状态
-	if err := stub.DelState(constructUserKey(name)); err != nil {
-		return shim.Error(fmt.Sprintf("delete user error: %s", err))
-	}
-
-	//TODO 删除和用户相关的数据
-
-	return shim.Success(nil)
-}
-
 func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 参数校验
 	if len(args) != 4 {
@@ -125,9 +61,9 @@ func getQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	// 获取用户角色
-	role, err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get user role error! %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 
 	// 根据角色确定是否返回数据
@@ -174,14 +110,14 @@ func delQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	//TODO 根据角色或者出题人做出约束，可切换
-	role, err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get role error !  %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 	if role != Teacher {
 		return shim.Error(fmt.Sprintf("this role : %s  not is teacher! ", role))
 	}
-	if err = putDelCache(stub, question_id); err != nil {
+	if err := putDelCache(stub, question_id); err != nil {
 		return shim.Error(fmt.Sprintf("put del cache error ! %s", err))
 	}
 	return shim.Success(nil)
@@ -243,9 +179,9 @@ func getScore(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	// 检查权限
-	role,err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get role error !  %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 	if name != stu_name && role != Teacher {
 		return shim.Error("not right to score !")
@@ -273,22 +209,12 @@ func getLogs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success(nil)
 }
 
-func getCache(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	// 检查参数
-	if len(args) != 1 {
-		return shim.Error("not enough args")
-	}
-
-	name := args[0]
-
-	if name =="" {
-		return shim.Error("invalid args")
-	}
+func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 
 	// 检查权限
-	role,err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get role error !  %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 	if role != Reviewer {
 		return shim.Error("not right to score !")
@@ -325,21 +251,20 @@ func getCache(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 检查参数
-	if len(args) != 3 {
+	if len(args) != 2 {
 		return shim.Error("not enough args")
 	}
 
-	name := args[0]
-	op := args[1]
-	question_id := args[2]
-	if name =="" || op == "" || question_id == "" {
+	op := args[0]
+	question_id := args[1]
+	if op == "" || question_id == "" {
 		return shim.Error("invalid args")
 	}
 
 	// 检查权限
-	role,err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get role error !  %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 	if role != Reviewer {
 		return shim.Error("not right to approve !")
@@ -366,7 +291,7 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Success(nil)
 	case Delete:
 		// 从缓存删除
-		err = stub.DelState(question_id)
+		err := stub.DelState(question_id)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}
@@ -378,21 +303,20 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 func reject(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 检查参数
-	if len(args) != 3 {
+	if len(args) != 2 {
 		return shim.Error("not enough args")
 	}
 
-	name := args[0]
-	op := args[1]
-	question_id := args[2]
-	if name =="" || op == "" || question_id == "" {
+	op := args[0]
+	question_id := args[1]
+	if op == "" || question_id == "" {
 		return shim.Error("invalid args")
 	}
 
 	// 检查权限
-	role,err := getRole(stub, name)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("get role error !  %s", err))
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
 	}
 	if role != Reviewer {
 		return shim.Error("not right to approve !")
@@ -400,7 +324,7 @@ func reject(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	switch op {
 	case Put:
 		// 从缓存删除
-		err = stub.DelState(question_id)
+		err := stub.DelState(question_id)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}

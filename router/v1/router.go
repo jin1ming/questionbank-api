@@ -40,6 +40,10 @@ func InitRouter() *gin.Engine {
 		apiv1.POST("/get_question", apiservice.GetQuestion)
 		// 获取待审核事件
 		apiv1.POST("/get_cache", apiservice.GetCache)
+		// 批准事件
+		apiv1.POST("/approve", apiservice.Approve)
+		// 拒绝事件
+		apiv1.POST("/reject", apiservice.Reject)
 	}
 
 	return r

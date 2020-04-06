@@ -113,14 +113,14 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.org1.questionbank.com
       #- FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      #- FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/cb7a604783cc1526b5d2bf11f86615c6ce7ef4ad1587dd7b593adbc214806c0b_sk
+      #- FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2614e9c7eacb6792a626523cac52d13b6f38d27699b7101f5b86c72ee265d48a_sk
       - FABRIC_CA_SERVER_TLS_ENABLED=false
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/cb7a604783cc1526b5d2bf11f86615c6ce7ef4ad1587dd7b593adbc214806c0b_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2614e9c7eacb6792a626523cac52d13b6f38d27699b7101f5b86c72ee265d48a_sk
     ports:
       - 7054:7054
-    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
-    #command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/7ce6485a969f6468f0d44c479a196836a8f0f747efce77269b418cb80590b1f3_sk -b admin:adminpw -d'
+    #command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/2614e9c7eacb6792a626523cac52d13b6f38d27699b7101f5b86c72ee265d48a_sk -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/org1.questionbank.com/ca/:/etc/hyperledger/fabric-ca-server-config
     networks:
@@ -159,6 +159,7 @@ services:
     command: peer node start
     volumes:
       - /var/run/:/host/var/run/
+      - ./../chaincode/:/opt/gopath/src/github.com/
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com/msp:/var/hyperledger/msp
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer0.org1.questionbank.com/tls:/var/hyperledger/tls
     ports:
@@ -203,6 +204,7 @@ services:
     command: peer node start
     volumes:
       - /var/run/:/host/var/run/
+      - ./../chaincode/:/opt/gopath/src/github.com/
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer1.org1.questionbank.com/msp:/var/hyperledger/msp
       - ./crypto-config/peerOrganizations/org1.questionbank.com/peers/peer1.org1.questionbank.com/tls:/var/hyperledger/tls
     ports:

@@ -16,11 +16,11 @@ func InitSdk(initInfo *sdkInit.InitInfo, configFile string) {
 		return
 	}
 
-	defer sdk.Close()
+	// defer sdk.Close() 写在这会提前关闭sdk
 
 
-	f,err := os.OpenFile("fixtures/crypto-config/log",os.O_RDWR|os.O_CREATE,0777)
-	if err!=nil && os.IsNotExist(err){
+	f,err := os.OpenFile("fixtures/crypto-config/log",os.O_RDWR,0777)
+	if err!=nil {
 		f, err = os.Create("fixtures/crypto-config/log")
 		if err != nil {
 			panic(err)

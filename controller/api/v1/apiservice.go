@@ -41,9 +41,9 @@ func AddUser(c *gin.Context) {
 	pwd := c.PostForm("pwd")
 	role := c.PostForm("role")
 
-	if name == "" || pwd == "" {
+	if name == "" || pwd == "" || role == ""{
 		c.JSON(200, gin.H{
-			"info":"请输入用户名密码！",
+			"info":"请输入用户名/密码/角色！",
 		})
 		return
 	}
@@ -129,21 +129,21 @@ func PutQuestion(c *gin.Context) {
 	question := c.PostForm("question")
 	answer := c.PostForm("answer")
 
-	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(Admin), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"增加试题失败!",
+			"info":"增加试题失败!code:1",
 		})
 		return
 	}
-	var txArgs = [][]byte{[]byte("putQuestion"), []byte(name), []byte(questionId), []byte(question), []byte(answer)}
-	err = executeCC(client, txArgs)
+	var txArgs = [][]byte{[]byte(name), []byte(questionId), []byte(question), []byte(answer)}
+	err = executeCC(client,"putQuestion", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"增加试题失败!",
+			"info":"增加试题失败!code:2",
 		})
 		return
 	}
@@ -169,8 +169,8 @@ func DelQuestion(c *gin.Context) {
 		return
 	}
 
-	var txArgs = [][]byte{[]byte("delQuestion"), []byte(name), []byte(questionId)}
-	err = executeCC(client, txArgs)
+	var txArgs = [][]byte{[]byte(name), []byte(questionId)}
+	err = executeCC(client, "delQuestion", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"info":"删除试题失败!",
@@ -199,8 +199,8 @@ func GetQuestion(c *gin.Context) {
 		return
 	}
 
-	var queryArgs = [][]byte{[]byte("getQuestion"), []byte(name), []byte(questionId)}
-	question, err := queryCC(client, queryArgs)
+	var queryArgs = [][]byte{[]byte(name), []byte(questionId)}
+	question, err := queryCC(client, "getQuestion", queryArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"info":"获取试题失败!",
@@ -217,6 +217,7 @@ func GetCache(c *gin.Context) {
 	session := sessions.Default(c)
 	name := session.Get("name").(string)
 
+	
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 
@@ -229,7 +230,7 @@ func GetCache(c *gin.Context) {
 	}
 
 	var queryArgs = [][]byte{[]byte("getCache"), []byte(name)}
-	events, err := queryCC(client, queryArgs)
+	events, err := queryCC(client, "getCache", queryArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"info":"获取待审核事件失败!",
@@ -245,5 +246,53 @@ func GetCache(c *gin.Context) {
 func Approve(c *gin.Context)  {
 	session := sessions.Default(c)
 	name := session.Get("name").(string)
-	//TODO
+	op := session.Get("op").(string)
+	questionId := session.Get("id").(string)
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info":"批准事件失败!",
+		})
+		return
+	}
+	var queryArgs = [][]byte{[]byte(name),[]byte(op), []byte(questionId)}
+	err = executeCC(client, "approve", queryArgs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"info":"批准事件失败!",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"info":"批准事件成功!",
+	})
+}
+
+func Reject(c *gin.Context)  {
+	session := sessions.Default(c)
+	name := session.Get("name").(string)
+	op := session.Get("op").(string)
+	questionId := session.Get("id").(string)
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info":"拒绝事件失败!",
+		})
+		return
+	}
+	var queryArgs = [][]byte{[]byte(name),[]byte(op), []byte(questionId)}
+	err = executeCC(client, "reject", queryArgs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"info":"拒绝事件失败!",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"info":"拒绝事件成功!",
+	})
 }

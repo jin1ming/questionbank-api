@@ -19,13 +19,13 @@ Organizations:
         Policies: &SampleOrgPolicies
             Readers:
                 Type: Signature
-                Rule: "OR('OrdererMSP.member', 'OrdererMSP.admin', 'OrdererMSP.peer', 'OrdererMSP.client')"
+                Rule: "OR('OrdererMSP.member', 'Org1MSP.member')"
             Writers:
                 Type: Signature
-                Rule: "OR('OrdererMSP.member', 'OrdererMSP.admin', 'OrdererMSP.peer', 'OrdererMSP.client')"
+                Rule: "OR('OrdererMSP.member', 'Org1MSP.member')"
             Admins:
                 Type: Signature
-                Rule: "OR('OrdererMSP.admin')"
+                Rule: "OR('OrdererMSP.admin','Org1MSP.admin')"
 
     - &Org1
         # DefaultOrg defines the organization which is used in the sampleconfig
@@ -43,7 +43,7 @@ Organizations:
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+                Rule: "OR('Org1MSP.member','Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
             Writers:
                 Type: Signature
                 Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"

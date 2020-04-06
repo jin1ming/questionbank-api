@@ -40,7 +40,7 @@ func (c *QuestionBank) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	case "reject":		// 审核失败
 		return reject(stub, args)
 	default:
-		return shim.Error("unknow function !")
+		return shim.Error(fmt.Sprintf("unknow function: %s", funcName))
 	}
 }
 
@@ -49,4 +49,15 @@ func main(){
 	if err != nil {
 		fmt.Printf("Error starting AssertsExchange chaincode: %s", err)
 	}
+}
+
+type LinkLnode struct {
+	data interface{}
+	next *LinkLnode
+}
+func print(head *LinkLnode) {
+	if head == nil {
+		return
+	}
+
 }

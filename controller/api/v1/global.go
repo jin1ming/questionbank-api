@@ -15,5 +15,5 @@ const (
 	Admin = "Admin"
 	ccID = "questionbank"
 	channelID = "miracle"
-	orgName = "Org1"
+	orgName = "org1"
 )

@@ -41,12 +41,15 @@ func RegisterUser(userName string, role string) (priFile string, pubFile string,
 		ECert: true,
 	}
 	attris = append(attris, attri)
+
 	request := &mspclient.RegistrationRequest{
 		Name: userName,
-		Type: "user",
+		Type: "client",
 		Secret: secret,
 		Attributes: attris,
 		Affiliation: orgName,
+		MaxEnrollments: 10,
+		CAName: "ca.org1.questionbank.com",
 	}
 	_, err = mspClient.Register(request)
 	if err != nil && !strings.Contains(err.Error(), "is already registered") {
@@ -105,9 +108,9 @@ func RemoveUser(userName string, userOrg string) error {
 	return nil
 }
 
-func queryCC(client *channel.Client, queryArgs [][]byte) ([]byte, error) {
-	response, err := client.Query(channel.Request{ChaincodeID: ccID, Fcn: "invoke", Args: queryArgs},
-		channel.WithRetry(retry.DefaultChannelOpts))
+func queryCC(client *channel.Client, fcn string, queryArgs [][]byte) ([]byte, error) {
+	response, err := client.Query(channel.Request{ChaincodeID: ccID, Fcn: fcn, Args: queryArgs},
+		channel.WithRetry(retry.DefaultChannelOpts), channel.WithTargetEndpoints("grpcs://peer0.org1.questionbank.com:7051"))
 	if err != nil {
 		log.Println("Failed to query: %s", err)
 		return nil, err
@@ -117,9 +120,9 @@ func queryCC(client *channel.Client, queryArgs [][]byte) ([]byte, error) {
 	return response.Payload, nil
 }
 
-func executeCC(client *channel.Client, txArgs [][]byte) error {
-	_, err := client.Execute(channel.Request{ChaincodeID: ccID, Fcn: "invoke", Args: txArgs},
-		channel.WithRetry(retry.DefaultChannelOpts))
+func executeCC(client *channel.Client, fcn string, txArgs [][]byte) error {
+	_, err := client.Execute(channel.Request{ChaincodeID: ccID, Fcn: fcn, Args: txArgs},
+		channel.WithRetry(retry.DefaultChannelOpts), channel.WithTargetEndpoints("grpcs://peer0.org1.questionbank.com:7051"))
 	if err != nil {
 		log.Println("Failed to execute: %s", err)
 		return err

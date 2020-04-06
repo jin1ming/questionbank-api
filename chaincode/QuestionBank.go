@@ -94,7 +94,6 @@ func getQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	default:
 		return shim.Error("user role error!  ")
 	}
-	return shim.Error("unknow error !")
 }
 
 func delQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {

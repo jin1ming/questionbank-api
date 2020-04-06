@@ -30,9 +30,18 @@ fi
 pre="FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/"
 sed -i "s#$pre.*#$pre$filename#" docker-compose.yml
 if [ $? -ne 0 ]; then
-    echo "自动修改出错！code:1"
+    echo "自动修改出错！code:2"
     exit 1
 fi
+
+
+pre="--ca.keyfile /etc/hyperledger/fabric-ca-server-config/"
+sed -i "s#$pre.*_sk#$pre$filename#" docker-compose.yml
+if [ $? -ne 0 ]; then
+    echo "自动修改出错！code:3"
+    exit 1
+fi
+
 echo "生成创世区块..."
 #用于指定启动排序服务
 configtxgen -profile MultiNodeEtcdRaft -outputBlock ./artifacts/genesis.block

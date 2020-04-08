@@ -16,16 +16,16 @@ Organizations:
         # Policies defines the set of policies at this level of the config tree
         # For organization policies, their canonical path is usually
         #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
-        Policies: &SampleOrgPolicies
+        Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('OrdererMSP.member', 'Org1MSP.member')"
+                Rule: "OR('OrdererMSP.member')"
             Writers:
                 Type: Signature
-                Rule: "OR('OrdererMSP.member', 'Org1MSP.member')"
+                Rule: "OR('OrdererMSP.member')"
             Admins:
                 Type: Signature
-                Rule: "OR('OrdererMSP.admin','Org1MSP.admin')"
+                Rule: "OR('OrdererMSP.admin')"
 
     - &Org1
         # DefaultOrg defines the organization which is used in the sampleconfig
@@ -43,7 +43,7 @@ Organizations:
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('Org1MSP.member','Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+                Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
             Writers:
                 Type: Signature
                 Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
@@ -124,12 +124,6 @@ Application: &ApplicationDefaults
         Admins:
             Type: ImplicitMeta
             Rule: "MAJORITY Admins"
-        LifecycleEndorsement:
-            Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
-        Endorsement:
-            Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
 
     Capabilities:
         <<: *ApplicationCapabilities

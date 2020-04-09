@@ -27,7 +27,7 @@ type InitInfo struct {
 	UserName	string
 }
 
-const ChaincodeVersion  = "2.0"
+const ChaincodeVersion  = "2.6"
 
 
 func SetupSDK(ConfigFile string) (*fabsdk.FabricSDK, error) {
@@ -61,37 +61,6 @@ func CreateChannel(sdk *fabsdk.FabricSDK, info *InitInfo) error {
 		return fmt.Errorf("根据指定的 OrgName 创建 Org MSP 客户端实例失败: %v", err)
 	}
 
-	/*用于测试*/
-	/*
-	userName := "w"
-	secret := "w"
-	//判断是否存在
-	//注册用户
-	request := &mspclient.RegistrationRequest{
-		Name:userName,
-		Type:"user",
-		CAName:"ca.org1.questionbank.com",
-		Secret:secret,
-	}
-	_, err = mspClient.Register(request)
-	if err != nil && !strings.Contains(err.Error(), "is already registered") {
-		panic(err)
-		log.Fatalf("register %s [%s]\n", userName, err)
-	}
-	//登记保存证书到stores
-	err = mspClient.Enroll(userName, mspclient.WithSecret(secret))
-	if err != nil {
-		log.Panicf("Failed to enroll user: %s\n", err)
-	}
-	//判断是否存在
-	id, err := mspClient.GetSigningIdentity(userName)
-	if err == nil {
-		log.Println("user exists: ", userName)
-		log.Println("id:", id)
-	}
-	log.Printf("register %s successfully\n", userName)
-	*/
-	//  Returns: signing identity
 	adminIdentity, err := mspClient.GetSigningIdentity(info.OrgAdmin)
 	if err != nil {
 		return fmt.Errorf("获取指定id的签名标识失败: %v", err)
@@ -141,7 +110,7 @@ func InstallAndInstantiateCC(sdk *fabsdk.FabricSDK, info *InitInfo) (*channel.Cl
 	fmt.Println("开始实例化链码......")
 
 	//  returns a policy that requires one valid
-	ccPolicy := cauthdsl.SignedByAnyMember([]string{"org1.questionbank.com"})
+	ccPolicy := cauthdsl.SignedByAnyMember([]string{"Org1MSP"})
 
 	instantiateCCReq := resmgmt.InstantiateCCRequest{Name: info.ChaincodeID, Path: info.ChaincodePath, Version: ChaincodeVersion, Args: [][]byte{[]byte("init")}, Policy: ccPolicy}
 	// instantiates chaincode with optional custom options (specific peers, filtered peers, timeout). If peer(s) are not specified

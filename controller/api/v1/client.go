@@ -115,7 +115,7 @@ func queryCC(client *channel.Client, fcn string, queryArgs [][]byte) ([]byte, er
 		log.Println("Failed to query: %s", err)
 		return nil, err
 	}
-	log.Println(response)
+	log.Println(string(response.Payload))
 
 	return response.Payload, nil
 }

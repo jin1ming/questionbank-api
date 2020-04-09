@@ -113,14 +113,14 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.org1.questionbank.com
       #- FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      #- FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/e013616460202ce02bf8f3bd80b4cfa1a51428a99f06d97e38ddbc3d72011f02_sk
+      #- FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/60bac74fe4dd2f962791cf3bfcaced90e8a3a527fa7715393381d310b36b16be_sk
       - FABRIC_CA_SERVER_TLS_ENABLED=false
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/e013616460202ce02bf8f3bd80b4cfa1a51428a99f06d97e38ddbc3d72011f02_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/60bac74fe4dd2f962791cf3bfcaced90e8a3a527fa7715393381d310b36b16be_sk
     ports:
       - 7054:7054
     #command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/e013616460202ce02bf8f3bd80b4cfa1a51428a99f06d97e38ddbc3d72011f02_sk -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.org1.questionbank.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/60bac74fe4dd2f962791cf3bfcaced90e8a3a527fa7715393381d310b36b16be_sk -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/org1.questionbank.com/ca/:/etc/hyperledger/fabric-ca-server-config
     networks:

@@ -19,18 +19,26 @@ func constructUserKey(name string) string {
 }
 
 // 放入待审核缓存
-func putQuesionCache(stub shim.ChaincodeStubInterface, q *Question) error {
-	Q, err := json.Marshal(q)
+func putQuesionCache(stub shim.ChaincodeStubInterface, Q *Question) error {
+	qBytes, err := json.Marshal(Q)
 	if err != nil {
 		return err
 	}
-	stub.PutState("cache_put_" + q.Id, Q)
+	err = stub.PutState("cache_put_" + Q.Id, qBytes)
+	if err != nil {
+		return nil
+	}
 	return nil
 }
 
 // 放入待删除缓存
-func putDelCache(stub shim.ChaincodeStubInterface, id string) error {
-	err := stub.PutState("cache_del_" + id, []byte(id))
+func putDelCache(stub shim.ChaincodeStubInterface, question_id string ) error {
+	qBytes, err := stub.GetState(question_id)
+
+	if err != nil {
+		return err
+	}
+	err = stub.PutState("cache_del_" + question_id[9:], qBytes)
 	if err != nil {
 		return err
 	}

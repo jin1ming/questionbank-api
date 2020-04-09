@@ -1,10 +1,11 @@
 package main
+
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"strings"
+	"log"
 )
 
 type QuestionBank struct{}
@@ -52,9 +53,11 @@ func getQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	Prefix := "question_"
 	// 根据id获取试题
+	/*
 	if 0 == strings.Count(question_id, "put_cache_"){
 		Prefix = ""
 	}
+	*/
 	qBytes, err := stub.GetState(Prefix + question_id)
 	if err != nil || qBytes == nil {
 		return shim.Error("not find question")
@@ -220,6 +223,8 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 
 	list := new(ListCache)
+	list.DelCache = make(map[string]Question)
+	list.PutCache = make(map[string]Question)
 
 	itPut, err := stub.GetStateByRange("cache_p","cache_q")
 	defer itPut.Close()
@@ -228,7 +233,12 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 	for itPut.HasNext() {
 		it, _ := itPut.Next()
-		list.PutCache = append(list.PutCache, it.Key)
+		Q := new(Question)
+		err = json.Unmarshal(it.Value,Q)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
+		}
+		list.PutCache[it.Key] = *Q
 	}
 
 	itDel, err := stub.GetStateByRange("cache_d","cache_e")
@@ -238,13 +248,19 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 	for itDel.HasNext() {
 		it, _ := itDel.Next()
-		list.DelCache = append(list.DelCache, it.Key)
+		Q := new(Question)
+		err = json.Unmarshal(it.Value,Q)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
+		}
+		list.DelCache[it.Key] = *Q
 	}
 
 	listBytes, err := json.Marshal(list)
 	if err != nil {
 		return shim.Error(fmt.Sprintf("marshal list error !", err))
 	}
+	log.Println("listBytes:",string(listBytes))
 	return shim.Success(listBytes)
 }
 
@@ -294,6 +310,10 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}
+		err = stub.DelState("cache_del_" + question_id[10:])
+		if err != nil {
+			return shim.Error(fmt.Sprintf("del question error ! %s", err))
+		}
 		return shim.Success(nil)
 	default:
 		return shim.Error("unknow op !")
@@ -329,6 +349,10 @@ func reject(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		}
 		return shim.Success(nil)
 	case Delete:
+		err := stub.DelState("cache_del_" + question_id[10:])
+		if err != nil {
+			return shim.Error(fmt.Sprintf("del question error ! %s", err))
+		}
 		return shim.Success(nil)
 	default:
 		return shim.Error("unknow op !")

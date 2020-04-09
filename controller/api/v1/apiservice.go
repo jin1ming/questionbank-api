@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -124,12 +125,21 @@ func DelUser(c *gin.Context) {
 
 func PutQuestion(c *gin.Context) {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
 	questionId := c.PostForm("id")
 	question := c.PostForm("question")
 	answer := c.PostForm("answer")
 
-	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(Admin), fabsdk.WithOrg(orgName))
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 
 	if err != nil {
@@ -155,8 +165,17 @@ func PutQuestion(c *gin.Context) {
 
 func DelQuestion(c *gin.Context) {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
-	questionId := session.Get("id").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
+	questionId := c.PostForm("id")
 
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
@@ -185,8 +204,17 @@ func DelQuestion(c *gin.Context) {
 
 func GetQuestion(c *gin.Context) {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
-	questionId := session.Get("id").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
+	questionId := c.PostForm("id")
 
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
@@ -203,19 +231,28 @@ func GetQuestion(c *gin.Context) {
 	question, err := queryCC(client, "getQuestion", queryArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"获取试题失败!",
+			"info": "获取试题失败!",
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"获取试题成功!",
-		"data":question,
+		"info": "获取试题成功!",
+		"data": json.RawMessage(question),
 	})
 }
 
 func GetCache(c *gin.Context) {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
 
 	
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
@@ -229,8 +266,7 @@ func GetCache(c *gin.Context) {
 		return
 	}
 
-	var queryArgs = [][]byte{[]byte("getCache"), []byte(name)}
-	events, err := queryCC(client, "getCache", queryArgs)
+	events, err := queryCC(client, "getCache", nil)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"info":"获取待审核事件失败!",
@@ -238,16 +274,25 @@ func GetCache(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"获取待审核事件成功!",
-		"data":events,
+		"info": "获取待审核事件成功!",
+		"data": json.RawMessage(events),
 	})
 }
 
 func Approve(c *gin.Context)  {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
-	op := session.Get("op").(string)
-	questionId := session.Get("id").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
+	op := c.PostForm("op")
+	questionId := c.PostForm("id")
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 	if err != nil {
@@ -257,7 +302,7 @@ func Approve(c *gin.Context)  {
 		})
 		return
 	}
-	var queryArgs = [][]byte{[]byte(name),[]byte(op), []byte(questionId)}
+	var queryArgs = [][]byte{[]byte(op), []byte(questionId)}
 	err = executeCC(client, "approve", queryArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -272,7 +317,16 @@ func Approve(c *gin.Context)  {
 
 func Reject(c *gin.Context)  {
 	session := sessions.Default(c)
-	name := session.Get("name").(string)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	}else if name == "" {
+		c.JSON(200, gin.H{
+			"info":"请登录！",
+		})
+		return
+	}
 	op := session.Get("op").(string)
 	questionId := session.Get("id").(string)
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))

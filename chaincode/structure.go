@@ -10,8 +10,8 @@ const (
 
 //需审核操作
 const (
-	Delete 		=	"Delete"
-	Put			= 	"Put"
+	Delete 		=	"delete"
+	Put			= 	"put"
 )
 
 // 用户
@@ -53,6 +53,6 @@ type Log struct {
 
 // 打包待审核事件ID
 type  ListCache struct {
-	PutCache []string `json:"PutCache"`
-	DelCache []string `json:"DelCache"`
+	PutCache map[string]Question `json:"putCache"`
+	DelCache map[string]Question `json:"delCache"`
 }

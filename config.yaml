@@ -307,7 +307,7 @@ peers:
 #
 certificateAuthorities:
   ca.org1.questionbank.com:
-    url: http://localhost:7054
+    url: https://ca.org1.questionbank.com:7054
     tlsCACerts:
       # Certificate location absolute path
       #path: ${GOPATH}/src/questionbank-api/fixtures/crypto-config/peerOrganizations/org1.questionbank.com/tlsca/tlsca.org1.questionbank.com-cert.pem
@@ -344,5 +344,5 @@ entityMatchers:
 
   certificateAuthorities:
     - pattern: (\w*)ca.org1.questionbank.com(\w*)
-      urlSubstitutionExp: http://localhost:7054
+      urlSubstitutionExp: https://localhost:7054
       mappedHost: ca.org1.questionbank.com

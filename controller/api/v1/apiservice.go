@@ -350,3 +350,17 @@ func Reject(c *gin.Context)  {
 		"info":"拒绝事件成功!",
 	})
 }
+/*
+func getLogs(c *gin.Context){
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(Admin), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+	response, err := client.Query(
+
+		client.Query()
+		{
+			ChaincodeID: "qscc",
+			Fcn: "invoke",
+			Args: integration.ExampleCCQueryArgs("GetChainInfo")
+		})
+}
+ */

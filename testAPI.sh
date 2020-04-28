@@ -54,7 +54,7 @@ echo -e "\n审查者批准待审核试题..."
 curl --request POST \
   --url http://127.0.0.1:8080/api/v1/approve \
   --header 'content-type: application/x-www-form-urlencoded' \
-  --data name=reviewer \
+  --data name=reviewer  \
   --data op=put \
   --data id=cache_put_1
 
@@ -77,8 +77,29 @@ echo -e "\n学生获取试题..."
 curl --request POST \
   --url http://127.0.0.1:8080/api/v1/get_question \
   --header 'content-type: application/x-www-form-urlencoded' \
-  --data name=student \
+  --data name=student  \
   --data id=1
+
+echo -e "\n注册管理员admin..."
+curl --request POST \
+  --url http://127.0.0.1:8080/api/v1/register \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data name=admin2 \
+  --data pwd=123 \
+  --data role=Admin
+
+echo -e "\n管理员登录..."
+curl --request POST \
+  --url http://127.0.0.1:8080/api/v1/login \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data name=admin2 \
+  --data pwd=123
+
+echo -e "\n管理员获取日志..."
+curl --request POST \
+  --url http://127.0.0.1:8080/api/v1/get_logs \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data name=admin2
 
 echo -e "\n"
 

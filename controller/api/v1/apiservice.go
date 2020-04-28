@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"log"
 )
 
+/*
 func InitRedis(addr string, pwd string, db int) (err error) {
 
 	Users = make(map[string]string)
@@ -17,7 +17,7 @@ func InitRedis(addr string, pwd string, db int) (err error) {
 	redisdb = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
-		DB:       db,  // use default DB
+		DB:       db, // use default DB
 	})
 
 	_, err = redisdb.Ping().Result()
@@ -26,7 +26,7 @@ func InitRedis(addr string, pwd string, db int) (err error) {
 	}
 	return nil
 }
-
+*/
 func GetUser(c *gin.Context) {
 	session := sessions.Default(c)
 	v := session.Get("name")
@@ -42,19 +42,19 @@ func AddUser(c *gin.Context) {
 	pwd := c.PostForm("pwd")
 	role := c.PostForm("role")
 
-	if name == "" || pwd == "" || role == ""{
+	if name == "" || pwd == "" || role == "" {
 		c.JSON(200, gin.H{
-			"info":"请输入用户名/密码/角色！",
+			"info": "请输入用户名/密码/角色！",
 		})
 		return
 	}
-	if Users[name] != "" {
-		c.JSON(200,gin.H{
-			"info":"该用户名已被注册！",
+	if checkName(name) {
+		c.JSON(401, gin.H{
+			"info": "该用户名已被注册！",
 		})
 		return
 	}
-	Users[name] = pwd
+	registerDb(name, pwd, role)
 	pri, pub, err := RegisterUser(name, role)
 	if err != nil {
 		panic(err)
@@ -62,23 +62,24 @@ func AddUser(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"info": "注册成功！",
-		"pri": pri,
-		"pub": pub,
+		"pri":  pri,
+		"pub":  pub,
 	})
 }
 
 func UserLogin(c *gin.Context) {
 	name := c.PostForm("name")
 	pwd := c.PostForm("pwd")
+	role := c.PostForm("role")
 	if name == "" || pwd == "" {
 		c.JSON(200, gin.H{
-			"info":"请输入用户名密码！",
+			"info": "请输入用户名密码！",
 		})
 		return
 	}
-	if Users[name] != pwd {
-		c.JSON(200, gin.H{
-			"info":"用户名密码不正确！",
+	if !checkPwd(name, pwd, role) {
+		c.JSON(401, gin.H{
+			"info": "用户名密码不正确！",
 		})
 		return
 	}
@@ -86,16 +87,16 @@ func UserLogin(c *gin.Context) {
 	session.Set("name", name)
 	session.Save()
 	c.JSON(200, gin.H{
-		"info":"登录成功！",
+		"info": "登录成功！",
 	})
 }
 
 func DelUser(c *gin.Context) {
 	session := sessions.Default(c)
 	userName := session.Get("name").(string)
-	if userName == ""{
+	if userName == "" {
 		c.JSON(401, gin.H{
-			"info":"您需要先登录!",
+			"info": "您需要先登录!",
 		})
 		return
 	}
@@ -104,7 +105,7 @@ func DelUser(c *gin.Context) {
 	id, err := GetId(userName, orgName)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"找不到被删除用户!",
+			"info": "找不到被删除用户!",
 		})
 		return
 	}
@@ -112,15 +113,20 @@ func DelUser(c *gin.Context) {
 		err = RemoveUser(name, orgName)
 		if err != nil {
 			c.JSON(200, gin.H{
-				"info":"删除用户失败! 请检查您的权利和被删除用户是否存在",
+				"info": "删除用户失败! 请检查您的权利和被删除用户是否存在",
 			})
 			return
 		}
+		// 从数据库中删除
+		delUser(name)
+
 		c.JSON(200, gin.H{
-			"info":"删除用户成功!",
+			"info": "删除用户成功!",
 		})
 		return
 	}
+
+
 }
 
 func PutQuestion(c *gin.Context) {
@@ -129,9 +135,9 @@ func PutQuestion(c *gin.Context) {
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
@@ -145,20 +151,20 @@ func PutQuestion(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"增加试题失败!code:1",
+			"info": "增加试题失败!code:1",
 		})
 		return
 	}
 	var txArgs = [][]byte{[]byte(name), []byte(questionId), []byte(question), []byte(answer)}
-	err = executeCC(client,"putQuestion", txArgs)
+	err = executeCC(client, "putQuestion", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"增加试题失败!code:2",
+			"info": "增加试题失败!code:2",
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"增加试题成功!",
+		"info": "增加试题成功!",
 	})
 
 }
@@ -169,9 +175,9 @@ func DelQuestion(c *gin.Context) {
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
@@ -183,7 +189,7 @@ func DelQuestion(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"删除试题失败!",
+			"info": "删除试题失败!",
 		})
 		return
 	}
@@ -192,12 +198,12 @@ func DelQuestion(c *gin.Context) {
 	err = executeCC(client, "delQuestion", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"删除试题失败!",
+			"info": "删除试题失败!",
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"删除试题成功!",
+		"info": "删除试题成功!",
 	})
 
 }
@@ -208,9 +214,9 @@ func GetQuestion(c *gin.Context) {
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
@@ -222,7 +228,7 @@ func GetQuestion(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"获取试题失败!",
+			"info": "获取试题失败!",
 		})
 		return
 	}
@@ -247,21 +253,20 @@ func GetCache(c *gin.Context) {
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
 
-	
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"获取待审核事件失败!",
+			"info": "获取待审核事件失败!",
 		})
 		return
 	}
@@ -269,7 +274,7 @@ func GetCache(c *gin.Context) {
 	events, err := queryCC(client, "getCache", nil)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"获取待审核事件失败!",
+			"info": "获取待审核事件失败!",
 		})
 		return
 	}
@@ -279,15 +284,15 @@ func GetCache(c *gin.Context) {
 	})
 }
 
-func Approve(c *gin.Context)  {
+func Approve(c *gin.Context) {
 	session := sessions.Default(c)
 	nt := session.Get("name")
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
@@ -298,32 +303,32 @@ func Approve(c *gin.Context)  {
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"批准事件失败!",
+			"info": "批准事件失败!",
 		})
 		return
 	}
-	var queryArgs = [][]byte{[]byte(op), []byte(questionId)}
-	err = executeCC(client, "approve", queryArgs)
+	var txArgs = [][]byte{[]byte(name), []byte(op), []byte(questionId)}
+	err = executeCC(client, "approve", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"批准事件失败!",
+			"info": "批准事件失败!",
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"批准事件成功!",
+		"info": "批准事件成功!",
 	})
 }
 
-func Reject(c *gin.Context)  {
+func Reject(c *gin.Context) {
 	session := sessions.Default(c)
 	nt := session.Get("name")
 	name := c.PostForm("name")
 	if nt != nil {
 		name = nt.(string)
-	}else if name == "" {
+	} else if name == "" {
 		c.JSON(200, gin.H{
-			"info":"请登录！",
+			"info": "请登录！",
 		})
 		return
 	}
@@ -334,33 +339,56 @@ func Reject(c *gin.Context)  {
 	if err != nil {
 		log.Println("Failed to create new channel client: %s", err)
 		c.JSON(200, gin.H{
-			"info":"拒绝事件失败!",
+			"info": "拒绝事件失败!",
 		})
 		return
 	}
-	var queryArgs = [][]byte{[]byte(name),[]byte(op), []byte(questionId)}
-	err = executeCC(client, "reject", queryArgs)
+	var txArgs = [][]byte{[]byte(name), []byte(op), []byte(questionId)}
+	err = executeCC(client, "reject", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"info":"拒绝事件失败!",
+			"info": "拒绝事件失败!",
 		})
 		return
 	}
 	c.JSON(200, gin.H{
-		"info":"拒绝事件成功!",
+		"info": "拒绝事件成功!",
 	})
 }
-/*
-func getLogs(c *gin.Context){
-	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(Admin), fabsdk.WithOrg(orgName))
-	client, err := channel.New(clientChannelContext)
-	response, err := client.Query(
 
-		client.Query()
-		{
-			ChaincodeID: "qscc",
-			Fcn: "invoke",
-			Args: integration.ExampleCCQueryArgs("GetChainInfo")
+func GetLogs(c *gin.Context) {
+	session := sessions.Default(c)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	} else if name == "" {
+		c.JSON(200, gin.H{
+			"info": "请登录！",
 		})
+		return
+	}
+
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info": "获取日志失败!",
+		})
+		return
+	}
+
+	logs, err := queryCC(client, "getLogs", nil)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"info": "获取日志失败!",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"info": "获取日志成功!",
+		"data": json.RawMessage(logs),
+	})
 }
- */

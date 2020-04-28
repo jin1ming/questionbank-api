@@ -1,0 +1,19 @@
+version: '2'
+
+networks:
+  questionbank-network:
+
+services:
+  redis:
+    hostname: redis
+    image: redis:latest
+    container_name: redis
+    restart: always
+    command: redis-server -d # 启动redis命令
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro # 设置容器时区与宿主机保持一致
+      - ./redis/data:/data
+    ports:
+      - "6379:6379"

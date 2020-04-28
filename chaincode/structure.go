@@ -45,10 +45,16 @@ type ExamScore struct {
 
 // 日志
 type Log struct {
-	Name string `json:"name"`		//产生该条日志的用户
 	Id string `json:"id"`
+	Time string `json:"time"`		//产生日志的时间
+	Name string `json:"name"`		//产生该条日志的用户
 	Op string `json:"op"`			//操作
-	Object string `json:"object"`	//操作目标
+	QuestionId string `json:"question_id"`	//操作目标
+}
+
+// 日志打包
+type Logs struct {
+	Data map[string]Log	`json:"data"`
 }
 
 // 打包待审核事件ID

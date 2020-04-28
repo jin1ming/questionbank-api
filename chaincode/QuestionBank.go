@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"log"
 )
 
 type QuestionBank struct{}
+
+func initLog(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	err := stub.PutState("num_of_logs", []byte("0"))
+	if err != nil {
+		panic(err)
+	}
+	return shim.Success(nil)
+}
 
 func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 参数校验
@@ -25,6 +32,7 @@ func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error("invalid args")
 	}
 
+	// 存入待审核事件
 	Q := &Question{
 		Owner:  name,
 		Id:     question_id,
@@ -35,6 +43,12 @@ func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	err := putQuesionCache(stub, Q)
 	if err != nil {
 		return shim.Error(fmt.Sprintf("put question cache err! %s", err))
+	}
+
+	// 记录到日志
+	err = addLog(stub, name, "putQuestion", question_id)
+	if err != nil {
+		panic(err)
 	}
 	return shim.Success(nil)
 }
@@ -122,6 +136,13 @@ func delQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if err := putDelCache(stub, question_id); err != nil {
 		return shim.Error(fmt.Sprintf("put del cache error ! %s", err))
 	}
+
+	// 记录到日志
+	err := addLog(stub, name, "delQuestion", question_id)
+	if err != nil {
+		panic(err)
+	}
+
 	return shim.Success(nil)
 }
 
@@ -207,8 +228,35 @@ func getScore(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 }
 
 func getLogs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	//TODO 日志信息获取
-	return shim.Success(nil)
+	// 检查权限
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
+	}
+	if role != Admin {
+		return shim.Error("not right to get logs !")
+	}
+	logs := new(Logs)
+	logs.Data = make(map[string]Log)
+	it, err := stub.GetStateByRange("lof","loh")
+	defer it.Close()
+	if err != nil {
+		return shim.Error(fmt.Sprintf("get logs error ! %s", err))
+	}
+	for it.HasNext() {
+		it, _ := it.Next()
+		L := new(Log)
+		err = json.Unmarshal(it.Value,L)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
+		}
+		logs.Data[it.Key] = *L
+	}
+	logsBytes, err := json.Marshal(logs)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("marshal logs error !", err))
+	}
+	return shim.Success(logsBytes)
 }
 
 func getCache(stub shim.ChaincodeStubInterface) pb.Response {
@@ -260,19 +308,20 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	if err != nil {
 		return shim.Error(fmt.Sprintf("marshal list error !", err))
 	}
-	log.Println("listBytes:",string(listBytes))
+	//log.Println("listBytes:",string(listBytes))
 	return shim.Success(listBytes)
 }
 
 func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 检查参数
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("not enough args")
 	}
 
-	op := args[0]
-	question_id := args[1]
-	if op == "" || question_id == "" {
+	name := args[0]
+	op := args[1]
+	question_id := args[2]
+	if name == "" || op == "" || question_id == "" {
 		return shim.Error("invalid args")
 	}
 
@@ -303,6 +352,11 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}
+		// 记录到日志
+		err = addLog(stub, name, "approve putQuestion", question_id)
+		if err != nil {
+			panic(err)
+		}
 		return shim.Success(nil)
 	case Delete:
 		// 从缓存删除
@@ -314,6 +368,12 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}
+
+		// 记录到日志
+		err = addLog(stub, name, "approve delQuestion", question_id)
+		if err != nil {
+			panic(err)
+		}
 		return shim.Success(nil)
 	default:
 		return shim.Error("unknow op !")
@@ -322,12 +382,13 @@ func approve(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 func reject(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 检查参数
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("not enough args")
 	}
 
-	op := args[0]
-	question_id := args[1]
+	name := args[0]
+	op := args[1]
+	question_id := args[2]
 	if op == "" || question_id == "" {
 		return shim.Error("invalid args")
 	}
@@ -347,11 +408,23 @@ func reject(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
 		}
+
+		// 记录到日志
+		err = addLog(stub, name, "reject putQuestion", question_id)
+		if err != nil {
+			panic(err)
+		}
 		return shim.Success(nil)
 	case Delete:
 		err := stub.DelState("cache_del_" + question_id[10:])
 		if err != nil {
 			return shim.Error(fmt.Sprintf("del question error ! %s", err))
+		}
+
+		// 记录到日志
+		err = addLog(stub, name, "reject delQuestion", question_id)
+		if err != nil {
+			panic(err)
 		}
 		return shim.Success(nil)
 	default:

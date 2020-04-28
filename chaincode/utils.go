@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"strconv"
+	"time"
 )
 
 
@@ -42,6 +44,46 @@ func putDelCache(stub shim.ChaincodeStubInterface, question_id string ) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// 写入日志
+func addLog(stub shim.ChaincodeStubInterface, name string, op string, question_id string) error {
+	t := time.Now().Format("2006-01-02 15:04")
+	idBytes, err := stub.GetState("num_logs")
+	if err != nil {
+		panic(err)
+	}
+	idStr := ""
+	if idBytes == nil {
+		idStr = "1"
+	} else {
+		id, err := strconv.Atoi(string(idBytes))
+		if err != nil {
+			panic(err)
+		}
+		idStr = strconv.Itoa(id + 1)
+	}
+	err = stub.PutState("num_logs", []byte(idStr))
+	if err != nil {
+		panic(err)
+	}
+	l := Log{
+		Id:         idStr,
+		Time:       t,
+		Name:       name,
+		Op:         op,
+		QuestionId: question_id,
+	}
+	lBytes, err := json.Marshal(l)
+	if err != nil {
+		return err
+	}
+	err = stub.PutState("log_" + idStr, lBytes)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

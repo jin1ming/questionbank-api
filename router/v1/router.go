@@ -21,13 +21,14 @@ func InitRouter() *gin.Engine {
 		/*****************测试API:Start*****************/
 		//获取用户
 		apiv1.GET("/user", apiservice.GetUser)
-		// 登录
-		apiv1.POST("/login", apiservice.UserLogin)
+
 		// 登出操作
 		//apiv1.GET("/logout", apiservice.UserLogout)
 		// 刷新token
 		//apiv1.GET("/token", apiservice.RefreshToken)
 		/******************测试API:END******************/
+		// 登录
+		apiv1.POST("/login", apiservice.UserLogin)
 		// 注册
 		apiv1.POST("/register", apiservice.AddUser)
 		// 删除用户
@@ -44,6 +45,8 @@ func InitRouter() *gin.Engine {
 		apiv1.POST("/approve", apiservice.Approve)
 		// 拒绝事件
 		apiv1.POST("/reject", apiservice.Reject)
+		// 获取日志
+		apiv1.POST("/get_logs", apiservice.GetLogs)
 	}
 
 	return r

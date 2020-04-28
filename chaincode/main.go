@@ -17,6 +17,8 @@ func (c *QuestionBank) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	funcName, args := stub.GetFunctionAndParameters()
 
 	switch funcName {
+	case "init_log":		//初始化
+		return  initLog(stub, args)
 	case "putQuestion":	// 存入试题（需审核）
 		return putQuestion(stub, args)
 	case "getQuestion":	// 获取试题

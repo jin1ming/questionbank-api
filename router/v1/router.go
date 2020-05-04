@@ -23,10 +23,7 @@ func InitRouter() *gin.Engine {
 		apiv1.GET("/user", apiservice.GetUser)
 
 		// 登出操作
-		//apiv1.GET("/logout", apiservice.UserLogout)
-		// 刷新token
-		//apiv1.GET("/token", apiservice.RefreshToken)
-		/******************测试API:END******************/
+		apiv1.GET("/logout", apiservice.UserLogout)
 		// 登录
 		apiv1.POST("/login", apiservice.UserLogin)
 		// 注册
@@ -39,6 +36,14 @@ func InitRouter() *gin.Engine {
 		apiv1.POST("/del_question", apiservice.DelQuestion)
 		// 查询试题
 		apiv1.POST("/get_question", apiservice.GetQuestion)
+		// 获取所有试卷
+		apiv1.GET("/get_all_papers", apiservice.GetAllPapers)
+		// 添加试卷
+		apiv1.POST("/add_paper", apiservice.AddPaper)
+		// 获取某试卷所有试题
+		apiv1.POST("/get_paper", apiservice.GetPaperQuestions)
+		// 删除某试卷中的部分试题
+		apiv1.POST("/del_paper_item", apiservice.DelPaperItem)
 		// 获取待审核事件
 		apiv1.POST("/get_cache", apiservice.GetCache)
 		// 批准事件

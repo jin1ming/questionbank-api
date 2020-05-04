@@ -2,11 +2,13 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"log"
+	"strconv"
 )
 
 /*
@@ -91,6 +93,82 @@ func UserLogin(c *gin.Context) {
 	})
 }
 
+func UserLogout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Delete("name")
+	c.JSON(200, gin.H{
+		"info": "用户注销！",
+	})
+}
+
+func AddPaper(c *gin.Context) {
+	session := sessions.Default(c)
+	username := session.Get("name")
+	title := c.PostForm("title")
+	owner := username.(string)
+	qsBytes := []byte(c.PostForm("question_ids"))
+	var QuestionIds []int64
+	err := json.Unmarshal(qsBytes, &QuestionIds)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"info": "Unmarshal wrong!",
+			"error": fmt.Sprintf("%s", err),
+		})
+		return
+	}
+	addPaper2Db(title, owner, QuestionIds)
+	c.JSON(200, gin.H{
+		"info":"添加试卷成功！",
+	})
+}
+
+func GetAllPapers(c *gin.Context) {
+	papers := getAllPapersFromDb()
+	c.JSON(200, gin.H{
+		"info": "获取所有试卷成功！",
+		"data": json.Marshal(papers),
+	})
+}
+
+func GetPaperQuestions(c *gin.Context) {
+	session := sessions.Default(c)
+	userName := session.Get("name").(string)
+	paperIdStr := c.PostForm("paper_id")
+	paperId, err := strconv.ParseInt(paperIdStr, 10, 64)
+	if userName == "" {
+		c.JSON(401, gin.H{
+			"info": "您需要先登录!",
+		})
+		return
+	}
+
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(userName), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info": "获取试题失败!",
+		})
+		return
+	}
+
+	questionIds := getPaperQuestionsFromDb(paperId)
+	var questions []string
+	for _,v := range questionIds {
+		var queryArgs = [][]byte{[]byte(userName), []byte(v)}
+		question, err := queryCC(client, "getQuestion", queryArgs)
+		if err != nil {
+			questions = append(questions, string(question))
+			// 需要测试下返回数据 不确定
+		}
+	}
+	c.JSON(200, gin.H{
+		"info": "获取试卷所有试题成功！",
+		"data": json.Marshal(questions),
+	})
+}
+
 func DelUser(c *gin.Context) {
 	session := sessions.Default(c)
 	userName := session.Get("name").(string)
@@ -104,7 +182,7 @@ func DelUser(c *gin.Context) {
 	name := c.PostForm("name") //待删除用户
 	id, err := GetId(userName, orgName)
 	if err != nil {
-		c.JSON(200, gin.H{
+		c.JSON(401, gin.H{
 			"info": "找不到被删除用户!",
 		})
 		return
@@ -112,13 +190,13 @@ func DelUser(c *gin.Context) {
 	if name == userName || (len(id.Attributes) > 1 && id.Attributes[0].Value == Admin) {
 		err = RemoveUser(name, orgName)
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(401, gin.H{
 				"info": "删除用户失败! 请检查您的权利和被删除用户是否存在",
 			})
 			return
 		}
 		// 从数据库中删除
-		delUser(name)
+		delUserFromDb(name)
 
 		c.JSON(200, gin.H{
 			"info": "删除用户成功!",
@@ -127,6 +205,18 @@ func DelUser(c *gin.Context) {
 	}
 
 
+}
+
+func DelPaperItem(c *gin.Context) {
+	paperIdStr := c.PostForm("paper_id")
+	paperId, err := strconv.ParseInt(paperIdStr, 10, 64)
+	var QuestionIds []string
+	err = json.Unmarshal([]byte(c.PostForm("question_ids")), &QuestionIds)
+	CheckErr(err)
+	delPaperItemFromDb(paperId, QuestionIds)
+	c.JSON(200, gin.H{
+		"info": "移除试卷中部分试题成功！",
+	})
 }
 
 func PutQuestion(c *gin.Context) {

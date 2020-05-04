@@ -51,12 +51,13 @@ func checkPwd(name string, pwd string, role string) bool{
 
 
 // 删除用户
-func delUser(name string){
+func delUserFromDb(name string){
 	_, err := db.Exec("DELETE FROM user WHERE username=?", name)
 	CheckErr(err)
 }
+
 // 添加试卷
-func addPaper(title string, owner string, questionId []int64 )  {
+func addPaper2Db(title string, owner string, questionId []int64 )  {
 	stmt,err := db.Prepare("INSERT paper (title, owner) values (?,?)")
 	CheckErr(err)
 	paperId, err := stmt.Exec(title, owner)
@@ -69,7 +70,7 @@ func addPaper(title string, owner string, questionId []int64 )  {
 }
 
 // 获取所有试卷
-func getAllPapers() (papers []Paper) {
+func getAllPapersFromDb() (papers []Paper) {
 	rows, err := db.Query("SELECT id, title, owner FROM paper")
 	CheckErr(err)
 	for rows.Next() {
@@ -81,8 +82,8 @@ func getAllPapers() (papers []Paper) {
 	return papers
 }
 
-// 获取指定试卷的试题
-func getPaperQuestions(paperId int64) (questionIds []int64) {
+// 获取指定试卷的试题id
+func getPaperQuestionsFromDb(paperId int64) (questionIds []string) {
 	rows, err := db.Query("SELECT id FROM paper_question WHERE paper_id=? ", paperId)
 	CheckErr(err)
 	for rows.Next() {
@@ -95,7 +96,7 @@ func getPaperQuestions(paperId int64) (questionIds []int64) {
 }
 
 // 删除试卷中的某些试题
-func delPaperItem(paperId int64, questionId []int64) {
+func delPaperItemFromDb(paperId int64, questionId []string) {
 	for i := range questionId {
 		stmt,err := db.Prepare("DELETE FROM paper_question WHERE paper_id = ? AND id = ?")
 		CheckErr(err)

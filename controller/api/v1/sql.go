@@ -87,7 +87,7 @@ func getPaperQuestionsFromDb(paperId int64) (questionIds []string) {
 	rows, err := db.Query("SELECT id FROM paper_question WHERE paper_id=? ", paperId)
 	CheckErr(err)
 	for rows.Next() {
-		var q int64
+		var q string
 		if err := rows.Scan(q); err == nil {
 			questionIds = append(questionIds, q)
 		}

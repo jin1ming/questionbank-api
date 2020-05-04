@@ -12,7 +12,7 @@ import (
 func main()  {
 
 	// 初始化redis
-	apiservice.InitRedis("localhost:6379", "", 0)
+	//apiservice.InitRedis("localhost:6379", "", 0)
 
 	// 初始化sdk、创建通道、安装链码
 	initInfo := &sdkInit.InitInfo{

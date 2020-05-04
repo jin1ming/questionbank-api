@@ -126,7 +126,7 @@ func GetAllPapers(c *gin.Context) {
 	papers := getAllPapersFromDb()
 	c.JSON(200, gin.H{
 		"info": "获取所有试卷成功！",
-		"data": json.Marshal(papers),
+		"data": papers,
 	})
 }
 
@@ -165,7 +165,7 @@ func GetPaperQuestions(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"info": "获取试卷所有试题成功！",
-		"data": json.Marshal(questions),
+		"data": questions,
 	})
 }
 

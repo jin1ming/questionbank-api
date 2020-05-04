@@ -15,7 +15,7 @@ go run main.go
 ```
 关闭区块链：
 ```shell script
-docker-compose -f docker-compose.yml up -down
+docker-compose -f docker-compose.yml down
 ```
 
 若区块链需要重置：

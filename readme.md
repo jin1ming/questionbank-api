@@ -23,3 +23,5 @@ docker-compose -f docker-compose.yml down
 cd fixtures
 ./init.sh
 ```
+## 3.注意事项
+- docker网络重置后必须重启电脑

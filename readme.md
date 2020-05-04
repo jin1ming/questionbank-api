@@ -2,9 +2,9 @@
 ## 1.环境
 go1.13+ (GO111MODULE=on)
 
-docker lasest
+docker latest
 
-docker-compose lasest
+docker-compose latest
 ## 2.运行步骤
 启动区块链及SDK：
 ```shell script

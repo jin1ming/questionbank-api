@@ -10,7 +10,7 @@ CREATE TABLE `paper` (
 CREATE TABLE `paper_question` (
     question_id varchar(255) NOT NULL,
     paper_id integer(64) NOT NULL,
-    primary key (`id`)
+    primary key (`question_id`)
 ) ;
 
 

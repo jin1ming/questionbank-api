@@ -20,7 +20,7 @@ func init() {
 // 用户注册
 func registerDb(name string, pwd string, role string)  {
 	pwdMd5 := getPwdMd5(pwd)
-	stmt,err := db.Prepare("INSERT user (user_name, password_md5, role) values (?,?,?)")
+	stmt,err := db.Prepare("INSERT user (username, pwd_md5, role) values (?,?,?)")
 	CheckErr(err)
 	//执行插入操作
 	_, err = stmt.Exec(name, pwdMd5, role)
@@ -107,7 +107,7 @@ func delPaperItemFromDb(paperId int64, questionId []string) {
 
 // 为密码生成md5,
 func getPwdMd5(pwd string) string {
-	return fmt.Sprintf("%s", md5.Sum([]byte(pwd)))
+	return fmt.Sprintf("%x", md5.Sum([]byte(pwd)))
 }
 
 func CheckErr(err error)  {

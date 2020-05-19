@@ -231,7 +231,7 @@ func PutQuestion(c *gin.Context) {
 		})
 		return
 	}
-	questionId := c.PostForm("id")
+
 	question := c.PostForm("question")
 	answer := c.PostForm("answer")
 
@@ -245,7 +245,7 @@ func PutQuestion(c *gin.Context) {
 		})
 		return
 	}
-	var txArgs = [][]byte{[]byte(name), []byte(questionId), []byte(question), []byte(answer)}
+	var txArgs = [][]byte{[]byte(name),  []byte(question), []byte(answer)}
 	err = executeCC(client, "putQuestion", txArgs)
 	if err != nil {
 		c.JSON(200, gin.H{

@@ -24,13 +24,14 @@ func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	name := args[0]
-	question_id := args[1]
-	question := args[2]
-	answer := args[3]
+	question := args[1]
+	answer := args[2]
 
-	if name == "" || question_id == "" || question == "" {
+	if name == "" || question == "" {
 		return shim.Error("invalid args")
 	}
+
+	question_id := getNextQuestionId(stub)
 
 	// 存入待审核事件
 	Q := &Question{

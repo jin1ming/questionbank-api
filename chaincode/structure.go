@@ -56,7 +56,7 @@ type Log struct {
 type Logs struct {
 	Data map[string]Log	`json:"data"`
 }
-
+//
 // 打包待审核事件ID
 type  ListCache struct {
 	PutCache map[string]Question `json:"putCache"`

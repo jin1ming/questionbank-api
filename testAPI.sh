@@ -83,6 +83,12 @@ curl --request POST \
   --data name=student  \
   --data id=1 
 
+echo -e "\n学生获取所有试题..."
+curl --request POST \
+  --url http://127.0.0.1:8080/api/v1/get_all_questions \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data name=student
+
 echo -e "\n注册管理员admin..."
 curl --request POST \
   --url http://127.0.0.1:8080/api/v1/register \
@@ -105,6 +111,11 @@ curl --request POST \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data name=admin2 
 
-echo -e "\n"
+echo -e "\n教师获取所有试题..."
+curl --request POST \
+  --url http://127.0.0.1:8080/api/v1/get_all_questions \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data name=teacher
 
+echo -e "\n"
 

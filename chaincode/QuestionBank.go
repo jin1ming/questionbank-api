@@ -19,7 +19,7 @@ func initLog(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 func putQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 参数校验
-	if len(args) != 4 {
+	if len(args) != 3 {
 		return shim.Error("not enough args")
 	}
 
@@ -107,6 +107,81 @@ func getQuestion(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	case Reviewer:
 		return shim.Success(qBytes)
 	case Admin:
+		//TODO 暂时不对管理员开放题库
+		fallthrough
+	default:
+		return shim.Error("user role error!  ")
+	}
+}
+
+//获取所有试题
+func getAllQuestions(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// 检查参数
+	if len(args) != 1 {
+		return shim.Error("not enough args")
+	}
+
+	name := args[0]
+	if name == "" {
+		return shim.Error("invalid args")
+	}
+
+	// 获取用户角色
+	role,ok := getRole(stub)
+	if !ok {
+		return shim.Error("get role error !")
+	}
+
+	// 根据角色确定是否返回数据
+	switch {
+	case role == Student:
+		var questions []QuestionN
+		it, err := stub.GetStateByRange("questiom","questioo")
+		defer it.Close()
+		if err != nil {
+			return shim.Error(fmt.Sprintf("get questions error ! %s", err))
+		}
+		for it.HasNext() {
+			it, _ := it.Next()
+			Q := new(Question)
+			err = json.Unmarshal(it.Value,Q)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
+			}
+			QN := &QuestionN{
+				Owner:	Q.Owner,
+				Id:    	Q.Id,
+				Data:  	Q.Data,
+			}
+			questions = append(questions, *QN)
+		}
+		questionsBytes, err := json.Marshal(questions)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("marshal questions error !", err))
+		}
+		return shim.Success(questionsBytes)
+	case role == Reviewer || role ==Teacher :
+		var questions []Question
+		it, err := stub.GetStateByRange("questiom","questioo")
+		defer it.Close()
+		if err != nil {
+			return shim.Error(fmt.Sprintf("get questions error ! %s", err))
+		}
+		for it.HasNext() {
+			it, _ := it.Next()
+			Q := new(Question)
+			err = json.Unmarshal(it.Value,Q)
+			if err != nil {
+				return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
+			}
+			questions = append(questions, *Q)
+		}
+		questionsBytes, err := json.Marshal(questions)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("marshal questions error !", err))
+		}
+		return shim.Success(questionsBytes)
+	case role == Admin:
 		//TODO 暂时不对管理员开放题库
 		fallthrough
 	default:

@@ -101,14 +101,18 @@ func getNextQuestionId(stub shim.ChaincodeStubInterface)(id string) {
 	if err != nil {
 		panic(err)
 	}
+	idNext := ""
 	if idBytes == nil {
 		id = "1"
+		idNext = "2"
+	}else{
+		idInt, err := strconv.Atoi(string(idBytes))
+		if err != nil {
+			panic(err)
+		}
+		id = strconv.Itoa(idInt)
+		idNext = strconv.Itoa(idInt + 1)
 	}
-	idInt, err := strconv.Atoi(string(idBytes))
-	if err != nil {
-		panic(err)
-	}
-	idNext := strconv.Itoa(idInt + 1)
 	err = stub.PutState("num_question", []byte(idNext))
 	if err != nil {
 		panic(err)

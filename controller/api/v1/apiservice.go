@@ -337,6 +337,44 @@ func GetQuestion(c *gin.Context) {
 	})
 }
 
+func GetAllQuestions(c *gin.Context) {
+	session := sessions.Default(c)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	} else if name == "" {
+		c.JSON(200, gin.H{
+			"info": "请登录！",
+		})
+		return
+	}
+
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
+	client, err := channel.New(clientChannelContext)
+
+	if err != nil {
+		log.Println("Failed to create new channel client: %s", err)
+		c.JSON(200, gin.H{
+			"info": "获取所有试题失败!",
+		})
+		return
+	}
+
+	var queryArgs = [][]byte{[]byte(name)}
+	questions, err := queryCC(client, "getAllQuestions", queryArgs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"info": "获取所有试题失败!",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"info": "获取所有试题成功!",
+		"data": json.RawMessage(questions),
+	})
+}
+
 func GetCache(c *gin.Context) {
 	session := sessions.Default(c)
 	nt := session.Get("name")

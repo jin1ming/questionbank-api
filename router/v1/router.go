@@ -36,6 +36,8 @@ func InitRouter() *gin.Engine {
 		apiv1.POST("/del_question", apiservice.DelQuestion)
 		// 查询试题
 		apiv1.POST("/get_question", apiservice.GetQuestion)
+		// 获取所有试题
+		apiv1.POST("/get_all_questions", apiservice.GetAllQuestions)
 		// 获取所有试卷
 		apiv1.GET("/get_all_papers", apiservice.GetAllPapers)
 		// 添加试卷

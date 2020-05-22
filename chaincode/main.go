@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -23,6 +23,8 @@ func (c *QuestionBank) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return putQuestion(stub, args)
 	case "getQuestion":	// 获取试题
 		return getQuestion(stub, args)
+	case "getAllQuestions":	//获取所有试题
+		return getAllQuestions(stub, args)
 	case "delQuestion":	// 删除试题（需审核）
 		return delQuestion(stub, args)
 	case "putScore":	// 添加学生成绩

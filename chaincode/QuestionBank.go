@@ -348,10 +348,13 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 		return shim.Error("not right to score !")
 	}
 
+	/*
 	list := new(ListCache)
 	list.DelCache = make(map[string]Question)
 	list.PutCache = make(map[string]Question)
+	 */
 
+	var list ListCache
 	itPut, err := stub.GetStateByRange("cache_p","cache_q")
 	defer itPut.Close()
 	if err != nil {
@@ -359,12 +362,15 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 	for itPut.HasNext() {
 		it, _ := itPut.Next()
+		list.PutCache = append(list.PutCache, it.Value)
+		/*
 		Q := new(Question)
 		err = json.Unmarshal(it.Value,Q)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
 		}
 		list.PutCache[it.Key] = *Q
+		 */
 	}
 
 	itDel, err := stub.GetStateByRange("cache_d","cache_e")
@@ -374,12 +380,15 @@ func getCache(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 	for itDel.HasNext() {
 		it, _ := itDel.Next()
+		list.DelCache = append(list.DelCache, it.Value)
+		/*
 		Q := new(Question)
 		err = json.Unmarshal(it.Value,Q)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
 		}
 		list.DelCache[it.Key] = *Q
+		 */
 	}
 
 	listBytes, err := json.Marshal(list)

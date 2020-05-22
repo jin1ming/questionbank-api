@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // 角色/身份
 const (
 	Student		=	"Student"
@@ -56,9 +58,9 @@ type Log struct {
 type Logs struct {
 	Data map[string]Log	`json:"data"`
 }
-//
+
 // 打包待审核事件ID
 type  ListCache struct {
-	PutCache map[string]Question `json:"putCache"`
-	DelCache map[string]Question `json:"delCache"`
+	PutCache []json.RawMessage `json:"putCache"`
+	DelCache []json.RawMessage `json:"delCache"`
 }

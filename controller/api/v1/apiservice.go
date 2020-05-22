@@ -103,11 +103,20 @@ func UserLogout(c *gin.Context) {
 
 func AddPaper(c *gin.Context) {
 	session := sessions.Default(c)
-	username := session.Get("name")
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	} else if name == "" {
+		c.JSON(200, gin.H{
+			"info": "请登录！",
+		})
+		return
+	}
 	title := c.PostForm("title")
-	owner := username.(string)
+	owner := name
 	qsBytes := []byte(c.PostForm("question_ids"))
-	var QuestionIds []int64
+	var QuestionIds []string
 	err := json.Unmarshal(qsBytes, &QuestionIds)
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -132,17 +141,21 @@ func GetAllPapers(c *gin.Context) {
 
 func GetPaperQuestions(c *gin.Context) {
 	session := sessions.Default(c)
-	userName := session.Get("name").(string)
-	paperIdStr := c.PostForm("paper_id")
-	paperId, err := strconv.ParseInt(paperIdStr, 10, 64)
-	if userName == "" {
-		c.JSON(401, gin.H{
-			"info": "您需要先登录!",
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	} else if name == "" {
+		c.JSON(200, gin.H{
+			"info": "请登录！",
 		})
 		return
 	}
 
-	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(userName), fabsdk.WithOrg(orgName))
+	paperIdStr := c.PostForm("paper_id")
+	paperId, err := strconv.ParseInt(paperIdStr, 10, 64)
+
+	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 
 	if err != nil {
@@ -154,18 +167,20 @@ func GetPaperQuestions(c *gin.Context) {
 	}
 
 	questionIds := getPaperQuestionsFromDb(paperId)
-	var questions []string
+	//log.Println(questionIds)
+	var questions []json.RawMessage
 	for _,v := range questionIds {
-		var queryArgs = [][]byte{[]byte(userName), []byte(v)}
+		//log.Println("v:",v)
+		var queryArgs = [][]byte{[]byte(name), []byte(v)}
 		question, err := queryCC(client, "getQuestion", queryArgs)
-		if err != nil {
-			questions = append(questions, string(question))
-			// 需要测试下返回数据 不确定
-		}
+		//log.Println(question)
+		CheckErr(err)
+		questions = append(questions, json.RawMessage(question))
 	}
+	questionsBytes, err := json.Marshal(questions)
 	c.JSON(200, gin.H{
 		"info": "获取试卷所有试题成功！",
-		"data": questions,
+		"data": json.RawMessage(questionsBytes),
 	})
 }
 

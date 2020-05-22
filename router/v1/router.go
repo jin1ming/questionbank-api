@@ -44,7 +44,7 @@ func InitRouter() *gin.Engine {
 		apiv1.POST("/add_paper", apiservice.AddPaper)
 		// 获取某试卷所有试题
 		apiv1.POST("/get_paper", apiservice.GetPaperQuestions)
-		// 删除某试卷中的部分试题
+		// 删除某试卷中的部分试题(暂不实现)
 		apiv1.POST("/del_paper_item", apiservice.DelPaperItem)
 		// 获取待审核事件
 		apiv1.POST("/get_cache", apiservice.GetCache)

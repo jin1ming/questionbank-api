@@ -27,7 +27,7 @@ type InitInfo struct {
 	UserName	string
 }
 
-const ChaincodeVersion  = "3.9"
+const ChaincodeVersion  = "4.0"
 
 
 func SetupSDK(ConfigFile string) (*fabsdk.FabricSDK, error) {

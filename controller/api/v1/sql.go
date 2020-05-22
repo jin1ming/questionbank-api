@@ -1,4 +1,5 @@
 package v1
+
 import (
 	md5 "crypto/md5"
 	"database/sql"
@@ -57,14 +58,18 @@ func delUserFromDb(name string){
 }
 
 // 添加试卷
-func addPaper2Db(title string, owner string, questionId []int64 )  {
+func addPaper2Db(title string, owner string, questionIds []string )  {
 	stmt,err := db.Prepare("INSERT paper (title, owner) values (?,?)")
 	CheckErr(err)
-	paperId, err := stmt.Exec(title, owner)
-	for i := range questionId{
-		stmt,err = db.Prepare("INSERT paper_item (id, paper_id) values (?,?)")
+	_, err = stmt.Exec(title, owner)
+	CheckErr(err)
+	var paperId int64
+	err = db.QueryRow("SELECT id FROM paper ORDER by id DESC LIMIT 1").Scan(&paperId)
+	CheckErr(err)
+	for i := range questionIds{
+		stmt,err = db.Prepare("INSERT paper_question (question_id, paper_id) values (?,?)")
 		CheckErr(err)
-		_, err = stmt.Exec(questionId[i], paperId)
+		_, err = stmt.Exec(questionIds[i], paperId)
 		CheckErr(err)
 	}
 }
@@ -84,21 +89,23 @@ func getAllPapersFromDb() (papers []Paper) {
 
 // 获取指定试卷的试题id
 func getPaperQuestionsFromDb(paperId int64) (questionIds []string) {
-	rows, err := db.Query("SELECT id FROM paper_question WHERE paper_id=? ", paperId)
+	rows, err := db.Query("SELECT question_id FROM paper_question WHERE paper_id=? ", paperId)
 	CheckErr(err)
 	for rows.Next() {
 		var q string
-		if err := rows.Scan(q); err == nil {
+		if err := rows.Scan(&q); err == nil {
+			//log.Println("q:",q)
 			questionIds = append(questionIds, q)
 		}
 	}
+	//log.Println("questionIds:", questionIds)
 	return questionIds
 }
 
 // 删除试卷中的某些试题
 func delPaperItemFromDb(paperId int64, questionId []string) {
 	for i := range questionId {
-		stmt,err := db.Prepare("DELETE FROM paper_question WHERE paper_id = ? AND id = ?")
+		stmt,err := db.Prepare("DELETE FROM paper_question WHERE paper_id = ? AND question_id = ?")
 		CheckErr(err)
 		_, err = stmt.Exec(paperId, questionId[i])
 		CheckErr(err)

@@ -312,8 +312,7 @@ func getLogs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if role != Admin {
 		return shim.Error("not right to get logs !")
 	}
-	logs := new(Logs)
-	logs.Data = make(map[string]Log)
+	var logs []json.RawMessage
 	it, err := stub.GetStateByRange("lof","loh")
 	defer it.Close()
 	if err != nil {
@@ -321,12 +320,15 @@ func getLogs(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	for it.HasNext() {
 		it, _ := it.Next()
+		logs = append(logs, it.Value)
+		/*
 		L := new(Log)
 		err = json.Unmarshal(it.Value,L)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("unmarshal question error! %s", err))
 		}
 		logs.Data[it.Key] = *L
+		*/
 	}
 	logsBytes, err := json.Marshal(logs)
 	if err != nil {

@@ -39,6 +39,33 @@ func GetUser(c *gin.Context) {
 	}
 }
 
+func GetAllUsers(c *gin.Context) {
+
+	session := sessions.Default(c)
+	name := session.Get("name").(string)
+	if name == ""  {
+		c.JSON(401, gin.H{
+			"info": "请登录！",
+		})
+		return
+	}
+
+	id, err := GetId(name, orgName)
+	if err != nil || len(id.Attributes) > 1 && id.Attributes[0].Value == Admin {
+		c.JSON(401, gin.H{
+			"info": "用户不是管理员！",
+		})
+		return
+	}
+
+	users := getAllUsersFromDb()
+	c.JSON(200, gin.H{
+		"info": "获取所有用户成功！",
+		"data": users,
+	})
+
+}
+
 func AddUser(c *gin.Context) {
 	name := c.PostForm("name")
 	pwd := c.PostForm("pwd")
@@ -51,7 +78,7 @@ func AddUser(c *gin.Context) {
 		return
 	}
 	if checkName(name) {
-		c.JSON(401, gin.H{
+		c.JSON(200, gin.H{
 			"info": "该用户名已被注册！",
 		})
 		return
@@ -74,7 +101,7 @@ func UserLogin(c *gin.Context) {
 	pwd := c.PostForm("pwd")
 	role := c.PostForm("role")
 	if name == "" || pwd == "" {
-		c.JSON(200, gin.H{
+		c.JSON(401, gin.H{
 			"info": "请输入用户名密码！",
 		})
 		return

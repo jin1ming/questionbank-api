@@ -22,6 +22,8 @@ func InitRouter() *gin.Engine {
 		//获取用户
 		apiv1.GET("/user", apiservice.GetUser)
 
+		// 获取所有用户
+		apiv1.GET("/get_all_users", apiservice.GetAllUsers)
 		// 登出操作
 		apiv1.GET("/logout", apiservice.UserLogout)
 		// 登录

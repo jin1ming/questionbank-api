@@ -31,7 +31,7 @@ func InitRouter() *gin.Engine {
 		// 注册
 		apiv1.POST("/register", apiservice.AddUser)
 		// 删除用户
-		apiv1.DELETE("/delete", apiservice.DelUser)
+		apiv1.POST("/delete", apiservice.DelUser)
 		// 增加试题
 		apiv1.POST("/put_question", apiservice.PutQuestion)
 		// 删除试题

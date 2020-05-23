@@ -12,7 +12,7 @@ const (
 
 //需审核操作
 const (
-	Delete 		=	"delete"
+	Delete 		=	"del"
 	Put			= 	"put"
 )
 

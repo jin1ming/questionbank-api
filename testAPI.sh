@@ -57,7 +57,6 @@ curl --request POST \
   --url http://127.0.0.1:8080/api/v1/approve \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data name=reviewer  \
-  --data op=put \
   --data id=cache_put_1
 
 echo -e "\n注册学生student..."

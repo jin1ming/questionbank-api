@@ -439,8 +439,9 @@ func Approve(c *gin.Context) {
 		})
 		return
 	}
-	op := c.PostForm("op")
+	//op := c.PostForm("op")
 	questionId := c.PostForm("id")
+	op := questionId[6:9]
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 	if err != nil {
@@ -475,8 +476,9 @@ func Reject(c *gin.Context) {
 		})
 		return
 	}
-	op := session.Get("op").(string)
-	questionId := session.Get("id").(string)
+	//op := c.PostForm("op")
+	questionId := c.PostForm("id")
+	op := questionId[6:9]
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(name), fabsdk.WithOrg(orgName))
 	client, err := channel.New(clientChannelContext)
 	if err != nil {

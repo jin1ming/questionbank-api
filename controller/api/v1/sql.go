@@ -74,6 +74,19 @@ func addPaper2Db(title string, owner string, questionIds []string )  {
 	}
 }
 
+// 获取所有用户
+func getAllUsersFromDb() (users []User) {
+	rows, err := db.Query("SELECT username, role FROM user")
+	CheckErr(err)
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.Name, &u.Role); err == nil {
+			users = append(users, u)
+		}
+	}
+	return users
+}
+
 // 获取所有试卷
 func getAllPapersFromDb() (papers []Paper) {
 	rows, err := db.Query("SELECT id, title, owner FROM paper")

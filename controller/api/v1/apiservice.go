@@ -226,11 +226,13 @@ func DelUser(c *gin.Context) {
 	id, err := GetId(userName, orgName)
 	if err != nil {
 		c.JSON(401, gin.H{
-			"info": "找不到被删除用户!",
+			"info": "找不到该用户!",
 		})
 		return
 	}
+
 	if name == userName || (len(id.Attributes) > 1 && id.Attributes[0].Value == Admin) {
+		/*
 		err = RemoveUser(name, orgName)
 		if err != nil {
 			c.JSON(401, gin.H{
@@ -238,6 +240,7 @@ func DelUser(c *gin.Context) {
 			})
 			return
 		}
+		 */
 		// 从数据库中删除
 		delUserFromDb(name)
 

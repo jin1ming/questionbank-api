@@ -11,24 +11,6 @@ import (
 	"strconv"
 )
 
-/*
-func InitRedis(addr string, pwd string, db int) (err error) {
-
-	Users = make(map[string]string)
-
-	redisdb = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       db, // use default DB
-	})
-
-	_, err = redisdb.Ping().Result()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-*/
 func GetUser(c *gin.Context) {
 	session := sessions.Default(c)
 	v := session.Get("name")

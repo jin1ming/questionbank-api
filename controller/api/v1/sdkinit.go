@@ -18,7 +18,6 @@ func InitSdk(initInfo *sdkInit.InitInfo, configFile string) {
 
 	// defer sdk.Close() 写在这会提前关闭sdk
 
-
 	f,err := os.OpenFile("fixtures/crypto-config/log",os.O_RDWR,0777)
 	if err!=nil {
 		f, err = os.Create("fixtures/crypto-config/log")
@@ -45,7 +44,5 @@ func InitSdk(initInfo *sdkInit.InitInfo, configFile string) {
 		return
 	}
 	fmt.Println(channelClient)
-
-
 
 }

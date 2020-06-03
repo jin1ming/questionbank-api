@@ -31,6 +31,8 @@ func GetAllUsers(c *gin.Context) {
 		})
 		return
 	}
+	// TODO 下面权限检验部分会导致前端偶尔出现401报错,类型stack
+	/*
 	name := nt.(string)
 
 	id, err := GetId(name, orgName)
@@ -40,7 +42,7 @@ func GetAllUsers(c *gin.Context) {
 		})
 		return
 	}
-
+	*/
 	users := getAllUsersFromDb()
 	c.JSON(200, gin.H{
 		"info": "获取所有用户成功！",

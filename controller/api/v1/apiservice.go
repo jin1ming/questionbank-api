@@ -141,6 +141,34 @@ func AddPaper(c *gin.Context) {
 	})
 }
 
+func DelPaper(c *gin.Context) {
+	session := sessions.Default(c)
+	nt := session.Get("name")
+	name := c.PostForm("name")
+	if nt != nil {
+		name = nt.(string)
+	} else if name == "" {
+		c.JSON(401, gin.H{
+			"info": "请登录！",
+		})
+		return
+	}
+
+	idStr := c.PostForm("id")
+	if idStr == "" {
+		c.JSON(200, gin.H{
+			"info": "未输入试卷id！",
+		})
+	}
+
+	id, err := strconv.Atoi(idStr)
+	CheckErr(err)
+	delPaperFromDb(id)
+	c.JSON(200, gin.H{
+		"info": "删除试卷成功！",
+	})
+}
+
 func GetAllPapers(c *gin.Context) {
 	papers := getAllPapersFromDb()
 	c.JSON(200, gin.H{

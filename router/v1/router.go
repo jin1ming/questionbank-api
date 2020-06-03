@@ -17,7 +17,7 @@ func InitRouter() *gin.Engine {
 
 	apiv1 := r.Group("/api/v1")
 	{
-		//获取用户
+		// 获取用户
 		apiv1.GET("/user", apiservice.GetUser)
 		// 获取所有用户
 		apiv1.GET("/get_all_users", apiservice.GetAllUsers)
@@ -41,6 +41,8 @@ func InitRouter() *gin.Engine {
 		apiv1.GET("/get_all_papers", apiservice.GetAllPapers)
 		// 添加试卷
 		apiv1.POST("/add_paper", apiservice.AddPaper)
+		// 删除指定试卷
+		apiv1.POST("/del_paper", apiservice.DelPaper)
 		// 获取某试卷所有试题
 		apiv1.POST("/get_paper", apiservice.GetPaperQuestions)
 		// 删除某试卷中的部分试题(暂不实现)

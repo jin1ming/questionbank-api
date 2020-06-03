@@ -74,6 +74,14 @@ func addPaper2Db(title string, owner string, questionIds []string )  {
 	}
 }
 
+// 删除指定试卷
+func delPaperFromDb(id int) {
+	_, err := db.Exec("DELETE FROM paper WHERE id=?", id)
+	CheckErr(err)
+	_, err = db.Exec("DELETE FROM paper_question WHERE paper_id=?", id)
+	CheckErr(err)
+}
+
 // 获取所有用户
 func getAllUsersFromDb() (users []User) {
 	rows, err := db.Query("SELECT username, role FROM user")

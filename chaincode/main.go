@@ -54,14 +54,3 @@ func main(){
 		fmt.Printf("Error starting AssertsExchange chaincode: %s", err)
 	}
 }
-
-type LinkLnode struct {
-	data interface{}
-	next *LinkLnode
-}
-func print(head *LinkLnode) {
-	if head == nil {
-		return
-	}
-
-}

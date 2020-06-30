@@ -1,8 +1,6 @@
 # fabric专用
 127.0.0.1	peer0.org1.questionbank.com	# p:7051,7053
-127.0.0.1	peer1.org1.questionbank.com	# p:7061,7063
 127.0.0.1	peer0.org2.questionbank.com	# p:7052,7054
-127.0.0.1	peer1.org2.questionbank.com	# p:7062,7064
 127.0.0.1 	orderer.questionbank.com	# p:8050
 127.0.0.1	orderer2.questionbank.com	# p:8051
 127.0.0.1	orderer3.questionbank.com	# p:8052
